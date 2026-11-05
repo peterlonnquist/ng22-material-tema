@@ -1,0 +1,119 @@
+<section class="hero">
+  <h1>Eget Material 3-tema</h1>
+  <p>
+    Färger från Materials prebuilt-tema <code>azure-blue</code> (M3), med
+    Open Sans (lokalt från assets) som typsnitt.
+  </p>
+</section>
+
+<div class="rutnat">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Knappar</mat-card-title>
+      <mat-card-subtitle>Alla varianter med temats färger</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="knappar">
+      <button matButton="filled">Filled</button>
+      <button matButton="tonal">Tonal</button>
+      <button matButton="elevated">Elevated</button>
+      <button matButton="outlined">Outlined</button>
+      <button matButton>Text</button>
+      <button matFab extended class="tertiar">
+        <mat-icon>bolt</mat-icon>
+        Tertiär FAB
+      </button>
+      <button matIconButton aria-label="Favorit"><mat-icon>favorite</mat-icon></button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Formulär</mat-card-title>
+      <mat-card-subtitle>Formfält, select och toggle</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="formular">
+      <mat-form-field appearance="outline">
+        <mat-label>Ditt namn</mat-label>
+        <input matInput [ngModel]="namn()" (ngModelChange)="namn.set($event)" />
+        <mat-icon matSuffix>person</mat-icon>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Miljö</mat-label>
+        <mat-select value="test">
+          <mat-option value="utv">Utveckling</mat-option>
+          <mat-option value="test">Test</mat-option>
+          <mat-option value="prod">Produktion</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-slide-toggle [checked]="notiser()" (change)="notiser.set($event.checked)">
+        Notiser {{ notiser() ? 'på' : 'av' }}
+      </mat-slide-toggle>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button matButton="filled" (click)="visaMeddelande()">Säg hej</button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Chips och förlopp</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-chip-listbox
+        multiple
+        aria-label="Taggar"
+        [value]="valdaTaggar()"
+        (change)="valdaTaggar.set($event.value)"
+      >
+        @for (tagg of taggar; track tagg) {
+          <mat-chip-option [value]="tagg">{{ tagg }}</mat-chip-option>
+        }
+      </mat-chip-listbox>
+      <p class="valt">Valda: {{ valdaTaggar().join(', ') || 'inga' }}</p>
+      <mat-progress-bar mode="determinate" [value]="valdaTaggar().length * 20" />
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="kompakt">
+    <mat-card-header>
+      <mat-card-title>Lokalt tema: densitet -2</mat-card-title>
+      <mat-card-subtitle>Klassen <code>.kompakt</code> sätter ett eget mat.theme()</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="avgangar" class="tabell">
+        <ng-container matColumnDef="linje">
+          <th mat-header-cell *matHeaderCellDef>Linje</th>
+          <td mat-cell *matCellDef="let a"><span class="linje">{{ a.linje }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="destination">
+          <th mat-header-cell *matHeaderCellDef>Destination</th>
+          <td mat-cell *matCellDef="let a">{{ a.destination }}</td>
+        </ng-container>
+        <ng-container matColumnDef="minuter">
+          <th mat-header-cell *matHeaderCellDef>Avgår</th>
+          <td mat-cell *matCellDef="let a">{{ a.minuter }} min</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="kolumner"></tr>
+        <tr mat-row *matRowDef="let rad; columns: kolumner"></tr>
+      </table>
+      <mat-form-field class="kompakt-falt">
+        <mat-label>Kompakt fält</mat-label>
+        <input matInput />
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<section class="palett" aria-label="Systemfärger">
+  <h2>Systemfärger (--mat-sys-*)</h2>
+  <div class="rutor">
+    <div class="ruta" style="background: var(--mat-sys-primary); color: var(--mat-sys-on-primary)">primary</div>
+    <div class="ruta" style="background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container)">primary-container</div>
+    <div class="ruta" style="background: var(--mat-sys-secondary); color: var(--mat-sys-on-secondary)">secondary</div>
+    <div class="ruta" style="background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container)">secondary-container</div>
+    <div class="ruta" style="background: var(--mat-sys-tertiary); color: var(--mat-sys-on-tertiary)">tertiary</div>
+    <div class="ruta" style="background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container)">tertiary-container</div>
+    <div class="ruta" style="background: var(--mat-sys-error); color: var(--mat-sys-on-error)">error</div>
+    <div class="ruta" style="background: var(--mat-sys-surface-container-high); color: var(--mat-sys-on-surface)">surface-container-high</div>
+  </div>
+</section>

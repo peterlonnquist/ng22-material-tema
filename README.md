@@ -21,8 +21,11 @@ npm run build
 | `src/styles/_overrides.scss` | Mixin med `theme-overrides` och `*-overrides` per komponent |
 | `src/styles.scss` | Enda ingångsfilen: tar in partials ovan på `html`, plus global bas-CSS (`body`, rubriker) |
 | `src/app/app.material-icons.ts` | `provideMaterialIcons()`: ikonfonten som standard för `<mat-icon>` och egna SVG-ikoner via `svgIcon="namn"` från `public/assets/icons` |
+| `src/app/app.routes.ts` | Routes: `/` (startsidan) och `/skapa` (formuläret), båda lazy-laddade |
+| `src/app/start/` | Startsidan som visar temat på Material-komponenter |
+| `src/app/skapa/` | Skapa-sidan: formulär med Angular Signal Forms, Material-select, textfält och datumväljare |
 | `src/app/tema/tema.service.ts` | Växlar ljust, mörkt eller systemläge genom att sätta en klass på `<html>` |
-| `src/app/app.scss` | Komponentstilar som bara använder `--mat-sys-*`-variabler |
+| `src/app/app.scss` | Stilar för appens ram (toolbar och meny), använder bara `--mat-sys-*`-variabler |
 
 ### Byta färger
 
@@ -40,3 +43,4 @@ En helt egen palett genereras med `ng generate @angular/material:theme-color`.
 - **Komponenttokens** skrivs över med `mat.button-overrides()`, `mat.toolbar-overrides()`, `mat.card-overrides()`, `mat.fab-overrides()` och `mat.button-toggle-overrides()`.
 - **Lokalt tema**: `.kompakt` anropar `mat.theme((density: -2))` för en del av sidan.
 - **Egna komponenter** stylas med `var(--mat-sys-…)` så att de följer temat automatiskt.
+- **Formulär med Signal Forms** på `/skapa`: `form()` med schema för validering (`required`, `minLength`, `email`, `min`/`max`, `minDate`), `[formField]` på Material-fälten och `[formRoot]` på `<form>` för att skicka. Datumväljaren använder `provideNativeDateAdapter()` med svenskt format.

@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.rubrik {
+  margin-bottom: 24px;
+
+  h1 {
+    font: var(--mat-sys-headline-medium);
+    margin: 0 0 4px;
+  }
+  p {
+    font: var(--mat-sys-body-large);
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+  }
+}
+
+// Två kolumner på breda skärmar, en kolumn på smala
+.falt {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  column-gap: 16px;
+  row-gap: 4px;
+  padding-top: 16px;
+}
+
+.hela {
+  grid-column: 1 / -1;
+}
+
+.kvitto {
+  margin-top: 24px;
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin: 16px 0 0;
+  }
+  dt {
+    font: var(--mat-sys-label-large);
+    color: var(--mat-sys-on-surface-variant);
+  }
+  dd {
+    margin: 0;
+  }
+}

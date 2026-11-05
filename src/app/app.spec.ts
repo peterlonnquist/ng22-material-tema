@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
 import { provideMaterialIcons } from './app.material-icons';
 import { TemaService } from './tema/tema.service';
@@ -9,7 +10,12 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideMaterialIcons()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideMaterialIcons(),
+      ],
     }).compileComponents();
   });
 
@@ -18,11 +24,11 @@ describe('App', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('visar rubriken', async () => {
+  it('visar menylänkar till Start och Skapa', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const element = fixture.nativeElement as HTMLElement;
-    expect(element.querySelector('h1')?.textContent).toContain('Eget Material 3-tema');
+    const lankar = (fixture.nativeElement as HTMLElement).querySelectorAll('nav.meny a');
+    expect([...lankar].map((a) => a.getAttribute('href'))).toEqual(['/', '/skapa']);
   });
 
   it('sätter mörkt-tema-klassen på <html> när läget ändras', async () => {
