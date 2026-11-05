@@ -8,7 +8,7 @@ Skapad med vanliga Angular CLI (inte Nx): standalone-komponenter, zoneless, sign
 ```bash
 npm install
 npm start          # http://localhost:4200
-npm test           # Vitest
+npm test           # Vitest + ng-mocks
 npm run build
 ```
 
@@ -44,3 +44,4 @@ En helt egen palett genereras med `ng generate @angular/material:theme-color`.
 - **Lokalt tema**: `.kompakt` anropar `mat.theme((density: -2))` för en del av sidan.
 - **Egna komponenter** stylas med `var(--mat-sys-…)` så att de följer temat automatiskt.
 - **Formulär med Signal Forms** på `/skapa`: `form()` med schema för validering (`required`, `minLength`, `email`, `min`/`max`, `minDate`), `[formField]` på Material-fälten och `[formRoot]` på `<form>` för att skicka. Datumväljaren använder `provideNativeDateAdapter()` med svenskt format.
+- **Tester med ng-mocks**: alla specar använder `MockBuilder`/`MockRender`. Material-komponenter mockas, det som testas behålls med `.keep()`. `src/test-setup.ts` gör mockade metoder till `vi.fn()` via `ngMocks.autoSpy('vitest')`.

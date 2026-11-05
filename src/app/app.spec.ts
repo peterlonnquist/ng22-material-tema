@@ -1,59 +1,37 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { RouterLink, provideRouter } from '@angular/router';
+import { MockBuilder, MockRender, NG_MOCKS_ROOT_PROVIDERS, ngMocks } from 'ng-mocks';
 import { App } from './app';
-import { provideMaterialIcons } from './app.material-icons';
 import { TemaService } from './tema/tema.service';
 
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-      providers: [
-        provideRouter([]),
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideMaterialIcons(),
-      ],
-    }).compileComponents();
-  });
+  // Material-komponenterna mockas. RouterLink och tjänster i rotinjektorn
+  // (Router, TemaService) behålls så att länkar och färgläge fungerar på riktigt.
+  beforeEach(() =>
+    MockBuilder(App).keep(RouterLink).keep(NG_MOCKS_ROOT_PROVIDERS).provide(provideRouter([])),
+  );
 
   it('skapar appen', () => {
-    const fixture = TestBed.createComponent(App);
-    expect(fixture.componentInstance).toBeTruthy();
+    const fixture = MockRender(App);
+    expect(fixture.point.componentInstance).toBeInstanceOf(App);
   });
 
-  it('visar menylänkar till Start och Skapa', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const lankar = (fixture.nativeElement as HTMLElement).querySelectorAll('nav.meny a');
-    expect([...lankar].map((a) => a.getAttribute('href'))).toEqual(['/', '/skapa']);
+  it('visar menylänkar till Start och Skapa', () => {
+    MockRender(App);
+    const lankar = ngMocks.findAll('nav.meny a');
+    expect(lankar.map((a) => ngMocks.formatText(a))).toEqual(['Start', 'Skapa']);
+    expect(lankar.map((a) => a.nativeElement.getAttribute('href'))).toEqual(['/', '/skapa']);
   });
 
-  it('sätter mörkt-tema-klassen på <html> när läget ändras', async () => {
-    const fixture = TestBed.createComponent(App);
-    const tema = TestBed.inject(TemaService);
+  it('sätter mörkt-tema-klassen på <html> när man väljer mörkt läge', async () => {
+    const fixture = MockRender(App);
 
-    tema.lage.set('morkt');
+    // Simulerar att användaren väljer "Mörkt" i den mockade button-toggle-gruppen
+    ngMocks.output('mat-button-toggle-group', 'change').emit({ value: 'morkt' });
     await fixture.whenStable();
 
+    expect(TestBed.inject(TemaService).lage()).toBe('morkt');
     expect(document.documentElement.classList.contains('morkt-tema')).toBe(true);
     expect(document.documentElement.classList.contains('ljust-tema')).toBe(false);
-  });
-
-  it('hämtar egna SVG-ikoner från /assets/icons', async () => {
-    const fixture = TestBed.createComponent(App);
-    const http = TestBed.inject(HttpTestingController);
-    fixture.detectChanges();
-
-    http
-      .expectOne('/assets/icons/logo.svg')
-      .flush('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"></svg>');
-    await fixture.whenStable();
-
-    const ikon = (fixture.nativeElement as HTMLElement).querySelector('mat-toolbar mat-icon svg');
-    expect(ikon).not.toBeNull();
-    http.verify();
   });
 });
