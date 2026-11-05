@@ -1,15 +1,20 @@
 // =============================================================================
 // Globala stilar – enda ingångsfilen i angular.json
 //
-//   ./styles/_fonts.scss      @font-face för Open Sans och Material Symbols (lokalt)
-//   ./styles/_theme.scss      mat.theme(): färg, typografi, densitet, ljust/mörkt
-//   ./styles/_overrides.scss  theme-overrides och <komponent>-overrides
+//   ./styles/_fonts.scss      fonts(), icon-font(): @font-face, serveras lokalt
+//   ./styles/_theme.scss      theme(), density(): mat.theme() och ljust/mörkt
+//   ./styles/_overrides.scss  overrides(): theme- och <komponent>-overrides
 //
+// Partials skriver inte ut någon CSS själva, allt sker via @include här.
 // Ordningen här styr ordningen i den färdiga CSS:en: tema före overrides.
 // =============================================================================
 @use './styles/fonts';
 @use './styles/theme';
 @use './styles/overrides';
+
+// @font-face måste ligga på toppnivå
+@include fonts.fonts();
+@include fonts.icon-font();
 
 html {
   height: 100%;

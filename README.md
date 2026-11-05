@@ -16,7 +16,7 @@ npm run build
 
 | Fil | Innehåll |
 | --- | --- |
-| `src/styles/_fonts.scss` | `@font-face` för Open Sans Regular och SemiBold (text) och Material Symbols Outlined (ikoner). Allt serveras lokalt från `public/assets/fonts`, inget från Google. |
+| `src/styles/_fonts.scss` | Mixins `fonts()` och `icon-font()` med `@font-face` för Open Sans Regular och SemiBold (text) och Material Symbols Outlined (ikoner). Allt serveras lokalt från `public/assets/fonts`, inget från Google. |
 | `src/styles/_theme.scss` | Mixin med `mat.theme()`: azure-blue-paletterna, typsnitt, densitet och ljust/mörkt läge |
 | `src/styles/_overrides.scss` | Mixin med `theme-overrides` och `*-overrides` per komponent |
 | `src/styles.scss` | Enda ingångsfilen: tar in partials ovan på `html`, plus global bas-CSS (`body`, rubriker) |
