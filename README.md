@@ -16,29 +16,22 @@ npm run build
 
 | Fil | Innehåll |
 | --- | --- |
-| `src/styles/_theme-colors.scss` | Genererade tonpaletter (primär, sekundär, tertiär, neutral, error) och högkontrast-mixin |
-| `src/styles.scss` | `mat.theme()` med egna paletter, typsnitt och densitet, plus `theme-overrides` och `*-overrides` per komponent |
+| `src/styles/_fonts.scss` | `@font-face` för Open Sans från `public/assets/fonts` |
+| `src/styles.scss` | `mat.theme()` med azure-blue-paletterna, typsnitt och densitet, plus `theme-overrides` och `*-overrides` per komponent |
 | `src/app/tema/tema.service.ts` | Växlar ljust, mörkt eller systemläge genom att sätta en klass på `<html>` |
 | `src/app/app.scss` | Komponentstilar som bara använder `--mat-sys-*`-variabler |
 
 ### Byta färger
 
-Kör schematic:en igen med nya hex-värden. Den skriver över `_theme-colors.scss`:
+Färgerna motsvarar prebuilt-temat `azure-blue.css`: `primary: mat.$azure-palette` och `tertiary: mat.$blue-palette`. Andra prebuilt-teman fås genom att byta paletter, t.ex. `mat.$cyan-palette` + `mat.$orange-palette` för `cyan-orange`.
 
-```bash
-ng generate @angular/material:theme-color \
-  --primary-color='#0F5257' --secondary-color='#4F6F52' \
-  --tertiary-color='#D98E04' --neutral-color='#5E6360' \
-  --error-color='#BA1A1A' --directory=src/styles/ --is-scss=true \
-  --include-high-contrast=true
-```
+En helt egen palett genereras med `ng generate @angular/material:theme-color`.
 
 ### Det här visar demon
 
-- **Egna paletter** i `mat.theme((color: (primary: …, tertiary: …)))`.
+- **Inbyggda M3-paletter** (azure + blue) i `mat.theme((color: (primary: …, tertiary: …)))`.
 - **Ljust och mörkt läge** med `color-scheme: light dark`. M3-temat använder `light-dark()`, så ett enda tema räcker för båda lägena.
-- **Högkontrast** via `@media (prefers-contrast: more)`.
-- **Typografi**: Space Grotesk som brand-typsnitt och Inter som plain-typsnitt.
+- **Typografi**: Open Sans (Regular och SemiBold) laddas lokalt från `public/assets/fonts`.
 - **Systemtokens** skrivs över med `mat.theme-overrides()` (hörnradier).
 - **Komponenttokens** skrivs över med `mat.button-overrides()`, `mat.toolbar-overrides()`, `mat.card-overrides()`, `mat.fab-overrides()` och `mat.button-toggle-overrides()`.
 - **Lokalt tema**: `.kompakt` anropar `mat.theme((density: -2))` för en del av sidan.

@@ -1,13 +1,12 @@
 // =============================================================================
 // Eget Angular Material-tema (Material 3)
 //
-// 1. Färgpaletterna i ./styles/_theme-colors.scss är genererade med:
-//      ng generate @angular/material:theme-color \
-//        --primary-color='#0F5257' --secondary-color='#4F6F52' \
-//        --tertiary-color='#D98E04' --neutral-color='#5E6360' \
-//        --error-color='#BA1A1A' --directory=src/styles/ --is-scss=true \
-//        --include-high-contrast=true
-//    Byt färger genom att köra kommandot igen med nya hex-värden.
+// 1. Färgerna är desamma som i Materials prebuilt-tema azure-blue.css (M3):
+//    primary = mat.$azure-palette, tertiary = mat.$blue-palette.
+//    Prebuilt-filen är bara ljus. Här används samma paletter i mat.theme(),
+//    så mörkt läge får motsvarande M3-färger via light-dark().
+//    Byt färger genom att välja en annan inbyggd palett, t.ex.
+//    mat.$cyan-palette + mat.$orange-palette (= cyan-orange.css).
 //
 // 2. mat.theme() skriver ut alla --mat-sys-* CSS-variabler (färg, typsnitt,
 //    form, densitet). Komponenterna läser sedan bara dessa variabler.
@@ -17,7 +16,6 @@
 // =============================================================================
 @use '@angular/material' as mat;
 @use './styles/fonts';
-@use './styles/theme-colors' as tema;
 
 html {
   height: 100%;
@@ -28,8 +26,8 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: tema.$primary-palette,
-        tertiary: tema.$tertiary-palette,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
       ),
       typography: (
         // Open Sans laddas lokalt, se ./styles/_fonts.scss.
@@ -83,11 +81,6 @@ html {
   }
   &.morkt-tema {
     color-scheme: dark;
-  }
-
-  // Högkontrast när användaren begär det i operativsystemet
-  @media (prefers-contrast: more) {
-    @include tema.high-contrast-overrides(color-scheme);
   }
 }
 
