@@ -7,24 +7,21 @@ import {
 import { MAT_ICON_DEFAULT_OPTIONS, MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 
-/** Namespace for custom SVG icons: <mat-icon svgIcon="app:name"> */
-export const CUSTOM_ICON_NAMESPACE = 'app';
-
-/** Folder in public/ containing custom SVG icons (served as /assets/icons/...). */
+/** Mapp i public/ med egna SVG-ikoner (serveras som /assets/icons/...). */
 const CUSTOM_ICON_PATH = '/assets/icons';
 
 /**
- * Angular Material icon configuration for <mat-icon>:
+ * Ikonkonfiguration för Angular Materials <mat-icon>:
  *
- * - Font icons (default): <mat-icon>home</mat-icon>
- *   Uses the Material Symbols Outlined icon font, see src/styles/_fonts.scss.
+ * - Fontikoner (standard): <mat-icon>home</mat-icon>
+ *   Använder ikonfonten Material Symbols Outlined, se src/styles/_fonts.scss.
  *
- * - Custom SVG icons: <mat-icon svgIcon="app:logo"></mat-icon>
- *   Loaded from public/assets/icons/logo.svg. To add an icon, drop an .svg file
- *   in that folder, no registration needed. Use fill="currentColor" (or no fill)
- *   in the SVG so the icon follows the theme colors.
+ * - Egna SVG-ikoner: <mat-icon svgIcon="logo"></mat-icon>
+ *   Hämtas från public/assets/icons/logo.svg. Ny ikon = lägg en .svg-fil i
+ *   mappen, ingen registrering behövs. Använd fill="currentColor" (eller ingen
+ *   fill) i SVG:n så att ikonen följer temats färger.
  *
- * Requires provideHttpClient(), since the SVG files are fetched with HttpClient.
+ * Kräver provideHttpClient(), eftersom SVG-filerna hämtas via HttpClient.
  */
 export function provideMaterialIcons(): EnvironmentProviders {
   return makeEnvironmentProviders([
@@ -35,8 +32,10 @@ export function provideMaterialIcons(): EnvironmentProviders {
       const sanitizer = inject(DomSanitizer);
 
       registry.addSvgIconResolver((name, namespace) =>
-        namespace === CUSTOM_ICON_NAMESPACE
-          ? // Safe: the URL always points to the app's own files
+        // Bara ikoner utan namespace (svgIcon="logo"). Namn med prefix, t.ex.
+        // "flaggor:se", lämnas åt andra ikonuppsättningar.
+        namespace === ''
+          ? // Säkert: adressen pekar alltid på appens egna filer
             sanitizer.bypassSecurityTrustResourceUrl(`${CUSTOM_ICON_PATH}/${name}.svg`)
           : null,
       );

@@ -6,6 +6,6 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(), // behövs för att hämta egna SVG-ikoner
-    provideMaterialIcons(), // ikonfont som standard + egna SVG-ikoner (app:namn)
+    provideMaterialIcons(), // ikonfont som standard + egna SVG-ikoner (svgIcon="namn")
   ],
 };

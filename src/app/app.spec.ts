@@ -36,7 +36,7 @@ describe('App', () => {
     expect(document.documentElement.classList.contains('ljust-tema')).toBe(false);
   });
 
-  it('hämtar egna SVG-ikoner (app:namn) från /assets/icons', async () => {
+  it('hämtar egna SVG-ikoner från /assets/icons', async () => {
     const fixture = TestBed.createComponent(App);
     const http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
