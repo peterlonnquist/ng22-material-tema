@@ -1,0 +1,112 @@
+// =============================================================================
+// Eget Angular Material-tema (Material 3)
+//
+// 1. Färgpaletterna i ./styles/_theme-colors.scss är genererade med:
+//      ng generate @angular/material:theme-color \
+//        --primary-color='#0F5257' --secondary-color='#4F6F52' \
+//        --tertiary-color='#D98E04' --neutral-color='#5E6360' \
+//        --error-color='#BA1A1A' --directory=src/styles/ --is-scss=true \
+//        --include-high-contrast=true
+//    Byt färger genom att köra kommandot igen med nya hex-värden.
+//
+// 2. mat.theme() skriver ut alla --mat-sys-* CSS-variabler (färg, typsnitt,
+//    form, densitet). Komponenterna läser sedan bara dessa variabler.
+//
+// 3. mat.theme-overrides() / mat.<komponent>-overrides() används för att
+//    finjustera enskilda tokens utan att skriva egen CSS mot interna klasser.
+// =============================================================================
+@use '@angular/material' as mat;
+@use './styles/theme-colors' as tema;
+
+html {
+  height: 100%;
+
+  // light dark = följ operativsystemet. Överstyrs av klasserna nedan.
+  color-scheme: light dark;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: tema.$primary-palette,
+        tertiary: tema.$tertiary-palette,
+      ),
+      typography: (
+        brand-family: 'Space Grotesk',
+        plain-family: 'Inter',
+        bold-weight: 700,
+        medium-weight: 500,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+
+  // Egna systemövergripande avvikelser från standard-M3
+  @include mat.theme-overrides(
+    (
+      corner-medium: 14px,
+      corner-large: 20px,
+      corner-extra-large: 28px,
+    )
+  );
+
+  // Komponent-specifika tokens
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 10px,
+      outlined-container-shape: 10px,
+      protected-container-shape: 10px,
+      text-container-shape: 10px,
+      tonal-container-shape: 10px,
+    )
+  );
+
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: var(--mat-sys-primary),
+      container-text-color: var(--mat-sys-on-primary),
+    )
+  );
+
+  @include mat.card-overrides(
+    (
+      outlined-outline-color: var(--mat-sys-outline-variant),
+    )
+  );
+
+  // Ljust / mörkt tema styrt av ThemeService (klass på <html>)
+  &.ljust-tema {
+    color-scheme: light;
+  }
+  &.morkt-tema {
+    color-scheme: dark;
+  }
+
+  // Högkontrast när användaren begär det i operativsystemet
+  @media (prefers-contrast: more) {
+    @include tema.high-contrast-overrides(color-scheme);
+  }
+}
+
+// Exempel på ett lokalt tema: kompaktare densitet inom en del av sidan
+.kompakt {
+  @include mat.theme(
+    (
+      density: -2,
+    )
+  );
+}
+
+body {
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+}

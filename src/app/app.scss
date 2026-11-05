@@ -1,0 +1,138 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  gap: 12px;
+}
+
+.titel {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+}
+
+.flex {
+  flex: 1;
+}
+
+.lage-valjare {
+  @include mat.button-toggle-overrides(
+    (
+      height: 40px,
+      selected-state-background-color: var(--mat-sys-primary-container),
+      selected-state-text-color: var(--mat-sys-on-primary-container),
+      background-color: transparent,
+      text-color: var(--mat-sys-on-primary),
+      divider-color: var(--mat-sys-on-primary),
+    )
+  );
+  border-color: var(--mat-sys-on-primary);
+}
+
+.innehall {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.hero {
+  padding: 32px;
+  margin-bottom: 24px;
+  border-radius: var(--mat-sys-corner-extra-large);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+
+  h1 {
+    font: var(--mat-sys-display-small);
+    margin: 0 0 8px;
+  }
+  p {
+    font: var(--mat-sys-body-large);
+    margin: 0;
+  }
+}
+
+.rutnat {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding-top: 16px;
+}
+
+// Tertiär färg på en enskild komponent via färgvariant
+.tertiar {
+  @include mat.fab-overrides(
+    (
+      container-color: var(--mat-sys-tertiary-container),
+      foreground-color: var(--mat-sys-on-tertiary-container),
+    )
+  );
+}
+
+.formular {
+  display: flex;
+  flex-direction: column;
+  padding-top: 16px;
+}
+
+.valt {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.tabell {
+  width: 100%;
+  background: transparent;
+}
+
+.linje {
+  display: inline-block;
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-tertiary);
+  color: var(--mat-sys-on-tertiary);
+  font: var(--mat-sys-label-large);
+  text-align: center;
+}
+
+.kompakt-falt {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.palett {
+  margin-top: 32px;
+
+  h2 {
+    font: var(--mat-sys-title-large);
+  }
+}
+
+.rutor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.ruta {
+  padding: 24px 12px;
+  border-radius: var(--mat-sys-corner-medium);
+  font: var(--mat-sys-label-medium);
+}
+
+code {
+  font-family: ui-monospace, monospace;
+}
