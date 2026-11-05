@@ -20,6 +20,7 @@ npm run build
 | `src/styles/_theme.scss` | Mixin med `mat.theme()`: azure-blue-paletterna, typsnitt, densitet och ljust/mörkt läge |
 | `src/styles/_overrides.scss` | Mixin med `theme-overrides` och `*-overrides` per komponent |
 | `src/styles.scss` | Enda ingångsfilen: tar in partials ovan på `html`, plus global bas-CSS (`body`, rubriker) |
+| `src/app/app.material-icons.ts` | `provideMaterialIcons()`: ikonfonten som standard för `<mat-icon>` och egna SVG-ikoner via `svgIcon="app:namn"` från `public/assets/icons` |
 | `src/app/tema/tema.service.ts` | Växlar ljust, mörkt eller systemläge genom att sätta en klass på `<html>` |
 | `src/app/app.scss` | Komponentstilar som bara använder `--mat-sys-*`-variabler |
 
@@ -34,7 +35,7 @@ En helt egen palett genereras med `ng generate @angular/material:theme-color`.
 - **Inbyggda M3-paletter** (azure + blue) i `mat.theme((color: (primary: …, tertiary: …)))`.
 - **Ljust och mörkt läge** med `color-scheme: light dark`. M3-temat använder `light-dark()`, så ett enda tema räcker för båda lägena.
 - **Typografi**: endast Open Sans (Regular och SemiBold), laddas lokalt från `public/assets/fonts`.
-- **Ikoner** via ikonfonten Material Symbols Outlined från npm-paketet `material-symbols`, serveras lokalt. `<mat-icon>` pekas mot den via `MAT_ICON_DEFAULT_OPTIONS` i `app.config.ts`.
+- **Ikoner** via ikonfonten Material Symbols Outlined från npm-paketet `material-symbols`, serveras lokalt. Egna SVG-ikoner läggs i `public/assets/icons/` och används med `<mat-icon svgIcon="app:namn">`. Båda konfigureras med `provideMaterialIcons()` i `app.config.ts`.
 - **Systemtokens** skrivs över med `mat.theme-overrides()` (hörnradier).
 - **Komponenttokens** skrivs över med `mat.button-overrides()`, `mat.toolbar-overrides()`, `mat.card-overrides()`, `mat.fab-overrides()` och `mat.button-toggle-overrides()`.
 - **Lokalt tema**: `.kompakt` anropar `mat.theme((density: -2))` för en del av sidan.

@@ -1,10 +1,11 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
+import { provideHttpClient } from '@angular/common/http';
+import { provideMaterialIcons } from './app.material-icons';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // <mat-icon> använder den lokala ikonfonten (se src/styles/_fonts.scss)
-    { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
+    provideHttpClient(), // behövs för att hämta egna SVG-ikoner
+    provideMaterialIcons(), // ikonfont som standard + egna SVG-ikoner (app:namn)
   ],
 };
