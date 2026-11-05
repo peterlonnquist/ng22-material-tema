@@ -2,6 +2,7 @@ import { DOCUMENT, Injectable, effect, inject, signal } from '@angular/core';
 
 export type TemaLage = 'system' | 'ljust' | 'morkt';
 
+// Läses även av inline-scriptet i src/index.html – ändra på båda ställena.
 const LAGRINGSNYCKEL = 'tema-lage';
 
 /** Styr ljust/mörkt läge genom att sätta en klass på <html>. */

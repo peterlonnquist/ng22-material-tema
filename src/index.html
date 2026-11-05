@@ -12,6 +12,20 @@
       href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
       rel="stylesheet"
     />
+    <script>
+      // Sätt sparat färgläge innan första rendering, så att sidan inte
+      // blinkar i fel läge innan Angular startat. Samma nyckel och klasser
+      // som TemaService (src/app/tema/tema.service.ts).
+      (function () {
+        try {
+          var lage = localStorage.getItem('tema-lage');
+          if (lage === 'ljust') document.documentElement.classList.add('ljust-tema');
+          if (lage === 'morkt') document.documentElement.classList.add('morkt-tema');
+        } catch (e) {
+          // localStorage kan saknas (t.ex. privat läge)
+        }
+      })();
+    </script>
   </head>
   <body>
     <app-root></app-root>
