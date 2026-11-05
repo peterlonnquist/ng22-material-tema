@@ -1,0 +1,24 @@
+// =============================================================================
+// Egna typsnitt från public/assets/fonts (serveras som /assets/fonts/...)
+//
+// Open Sans finns i två vikter: 400 (Regular) och 600 (SemiBold).
+// Webbläsaren väljer fil utifrån font-weight. Vikter som saknas (t.ex. 500
+// eller 700) avrundas till närmaste fil, så i temat mappas Materials
+// medium- och bold-vikt till 600 för att få förutsägbart resultat.
+// =============================================================================
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('/assets/fonts/OpenSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('/assets/fonts/OpenSans-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}

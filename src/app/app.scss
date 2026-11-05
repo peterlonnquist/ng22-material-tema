@@ -12,8 +12,8 @@ mat-toolbar {
 }
 
 .titel {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
+  font-family: var(--mat-sys-title-large-font), sans-serif;
+  font-weight: 600;
 }
 
 .flex {

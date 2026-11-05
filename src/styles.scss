@@ -16,6 +16,7 @@
 //    finjustera enskilda tokens utan att skriva egen CSS mot interna klasser.
 // =============================================================================
 @use '@angular/material' as mat;
+@use './styles/fonts';
 @use './styles/theme-colors' as tema;
 
 html {
@@ -31,10 +32,12 @@ html {
         tertiary: tema.$tertiary-palette,
       ),
       typography: (
-        brand-family: 'Space Grotesk',
-        plain-family: 'Inter',
-        bold-weight: 700,
-        medium-weight: 500,
+        // Open Sans laddas lokalt, se ./styles/_fonts.scss.
+        // Endast 400 och 600 finns, så medium och bold använder SemiBold.
+        brand-family: 'Open Sans',
+        plain-family: 'Open Sans',
+        bold-weight: 600,
+        medium-weight: 600,
         regular-weight: 400,
       ),
       density: 0,
@@ -108,5 +111,6 @@ body {
 h1,
 h2,
 h3 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--mat-sys-headline-small-font), sans-serif;
+  font-weight: 600;
 }
