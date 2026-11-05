@@ -1,9 +1,10 @@
 // =============================================================================
-// Alla fonter serveras lokalt från public/assets/fonts (/assets/fonts/...).
-// Inget laddas från fonts.googleapis.com eller fonts.gstatic.com.
+// Alla fonter serveras lokalt. Inget laddas från fonts.googleapis.com eller
+// fonts.gstatic.com.
 //
-// Text: endast Open Sans Regular (400) och SemiBold (600).
-// Ikoner: Material Symbols Outlined.
+// Text: endast Open Sans Regular (400) och SemiBold (600),
+//       från public/assets/fonts (/assets/fonts/...).
+// Ikoner: Material Symbols Outlined från npm-paketet material-symbols.
 //
 // Webbläsaren väljer fil utifrån font-weight. Vikter som saknas (t.ex. 500
 // eller 700) avrundas till närmaste fil, så i temat mappas Materials
@@ -12,6 +13,7 @@
 // @font-face måste ligga på toppnivå, så mixinerna inkluderas i roten av
 // styles.scss, inte inuti en selektor.
 // =============================================================================
+@use 'sass:meta';
 
 // Textfonten Open Sans.
 @mixin fonts() {
@@ -32,30 +34,11 @@
   }
 }
 
-// Ikonfont: Material Symbols Outlined (Apache 2.0), vikt 400.
-// Används av <mat-icon> via MAT_ICON_DEFAULT_OPTIONS i app.config.ts.
+// Ikonfont: Material Symbols Outlined från npm-paketet material-symbols
+// (Apache 2.0). Paketet innehåller både fontfilen och CSS:en (@font-face och
+// klassen .material-symbols-outlined). Angular kopierar fontfilen till bygget,
+// så den serveras lokalt. Används av <mat-icon> via MAT_ICON_DEFAULT_OPTIONS
+// i app.config.ts.
 @mixin icon-font() {
-  @font-face {
-    font-family: 'Material Symbols Outlined';
-    src: url('/assets/fonts/MaterialSymbolsOutlined.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: block; // visa inte ikonnamnen som text medan fonten laddas
-  }
-
-  .material-symbols-outlined {
-    font-family: 'Material Symbols Outlined';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    font-feature-settings: 'liga';
-    -webkit-font-smoothing: antialiased;
-  }
+  @include meta.load-css('material-symbols/outlined.css');
 }
