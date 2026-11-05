@@ -17,7 +17,9 @@ npm run build
 | Fil | Innehåll |
 | --- | --- |
 | `src/styles/_fonts.scss` | `@font-face` för Open Sans från `public/assets/fonts` |
-| `src/styles.scss` | `mat.theme()` med azure-blue-paletterna, typsnitt och densitet, plus `theme-overrides` och `*-overrides` per komponent |
+| `src/styles/_theme.scss` | Mixin med `mat.theme()`: azure-blue-paletterna, typsnitt, densitet och ljust/mörkt läge |
+| `src/styles/_overrides.scss` | Mixin med `theme-overrides` och `*-overrides` per komponent |
+| `src/styles.scss` | Enda ingångsfilen: tar in partials ovan på `html`, plus global bas-CSS (`body`, rubriker) |
 | `src/app/tema/tema.service.ts` | Växlar ljust, mörkt eller systemläge genom att sätta en klass på `<html>` |
 | `src/app/app.scss` | Komponentstilar som bara använder `--mat-sys-*`-variabler |
 

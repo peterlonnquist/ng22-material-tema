@@ -1,96 +1,26 @@
 // =============================================================================
-// Eget Angular Material-tema (Material 3)
+// Globala stilar – enda ingångsfilen i angular.json
 //
-// 1. Färgerna är desamma som i Materials prebuilt-tema azure-blue.css (M3):
-//    primary = mat.$azure-palette, tertiary = mat.$blue-palette.
-//    Prebuilt-filen är bara ljus. Här används samma paletter i mat.theme(),
-//    så mörkt läge får motsvarande M3-färger via light-dark().
-//    Byt färger genom att välja en annan inbyggd palett, t.ex.
-//    mat.$cyan-palette + mat.$orange-palette (= cyan-orange.css).
+//   ./styles/_fonts.scss      @font-face för Open Sans (public/assets/fonts)
+//   ./styles/_theme.scss      mat.theme(): färg, typografi, densitet, ljust/mörkt
+//   ./styles/_overrides.scss  theme-overrides och <komponent>-overrides
 //
-// 2. mat.theme() skriver ut alla --mat-sys-* CSS-variabler (färg, typsnitt,
-//    form, densitet). Komponenterna läser sedan bara dessa variabler.
-//
-// 3. mat.theme-overrides() / mat.<komponent>-overrides() används för att
-//    finjustera enskilda tokens utan att skriva egen CSS mot interna klasser.
+// Ordningen här styr ordningen i den färdiga CSS:en: tema före overrides.
 // =============================================================================
-@use '@angular/material' as mat;
 @use './styles/fonts';
+@use './styles/theme';
+@use './styles/overrides';
 
 html {
   height: 100%;
 
-  // light dark = följ operativsystemet. Överstyrs av klasserna nedan.
-  color-scheme: light dark;
-
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: (
-        // Open Sans laddas lokalt, se ./styles/_fonts.scss.
-        // Endast 400 och 600 finns, så medium och bold använder SemiBold.
-        brand-family: 'Open Sans',
-        plain-family: 'Open Sans',
-        bold-weight: 600,
-        medium-weight: 600,
-        regular-weight: 400,
-      ),
-      density: 0,
-    )
-  );
-
-  // Egna systemövergripande avvikelser från standard-M3
-  @include mat.theme-overrides(
-    (
-      corner-medium: 14px,
-      corner-large: 20px,
-      corner-extra-large: 28px,
-    )
-  );
-
-  // Komponent-specifika tokens
-  @include mat.button-overrides(
-    (
-      filled-container-shape: 10px,
-      outlined-container-shape: 10px,
-      protected-container-shape: 10px,
-      text-container-shape: 10px,
-      tonal-container-shape: 10px,
-    )
-  );
-
-  @include mat.toolbar-overrides(
-    (
-      container-background-color: var(--mat-sys-primary),
-      container-text-color: var(--mat-sys-on-primary),
-    )
-  );
-
-  @include mat.card-overrides(
-    (
-      outlined-outline-color: var(--mat-sys-outline-variant),
-    )
-  );
-
-  // Ljust / mörkt tema styrt av ThemeService (klass på <html>)
-  &.ljust-tema {
-    color-scheme: light;
-  }
-  &.morkt-tema {
-    color-scheme: dark;
-  }
+  @include theme.theme();
+  @include overrides.overrides();
 }
 
 // Exempel på ett lokalt tema: kompaktare densitet inom en del av sidan
 .kompakt {
-  @include mat.theme(
-    (
-      density: -2,
-    )
-  );
+  @include theme.density(-2);
 }
 
 body {

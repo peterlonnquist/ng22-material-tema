@@ -1,0 +1,43 @@
+// =============================================================================
+// Finjusteringar av Material-tokens
+//
+// mat.theme-overrides() / mat.<komponent>-overrides() ändrar enskilda tokens
+// utan att skriva egen CSS mot Materials interna klasser.
+// Inkluderas på html i styles.scss, efter temat.
+// =============================================================================
+@use '@angular/material' as mat;
+
+@mixin overrides() {
+  // Egna systemövergripande avvikelser från standard-M3
+  @include mat.theme-overrides(
+    (
+      corner-medium: 14px,
+      corner-large: 20px,
+      corner-extra-large: 28px,
+    )
+  );
+
+  // Komponent-specifika tokens
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 10px,
+      outlined-container-shape: 10px,
+      protected-container-shape: 10px,
+      text-container-shape: 10px,
+      tonal-container-shape: 10px,
+    )
+  );
+
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: var(--mat-sys-primary),
+      container-text-color: var(--mat-sys-on-primary),
+    )
+  );
+
+  @include mat.card-overrides(
+    (
+      outlined-outline-color: var(--mat-sys-outline-variant),
+    )
+  );
+}

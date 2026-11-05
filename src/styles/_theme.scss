@@ -1,0 +1,57 @@
+// =============================================================================
+// Angular Material-tema (Material 3)
+//
+// Färgerna är desamma som i Materials prebuilt-tema azure-blue.css (M3):
+// primary = mat.$azure-palette, tertiary = mat.$blue-palette.
+// Prebuilt-filen är bara ljus. Här används samma paletter i mat.theme(),
+// så mörkt läge får motsvarande M3-färger via light-dark().
+// Byt färger genom att välja en annan inbyggd palett, t.ex.
+// mat.$cyan-palette + mat.$orange-palette (= cyan-orange.css).
+//
+// mat.theme() skriver ut alla --mat-sys-* CSS-variabler (färg, typsnitt,
+// form, densitet). Komponenterna läser sedan bara dessa variabler.
+// =============================================================================
+@use '@angular/material' as mat;
+
+// Hela temat. Inkluderas på html i styles.scss.
+@mixin theme() {
+  // light dark = följ operativsystemet. Överstyrs av klasserna nedan.
+  color-scheme: light dark;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        // Open Sans laddas lokalt, se ./_fonts.scss.
+        // Endast 400 och 600 finns, så medium och bold använder SemiBold.
+        brand-family: 'Open Sans',
+        plain-family: 'Open Sans',
+        bold-weight: 600,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+
+  // Ljust / mörkt tema styrt av TemaService (klass på <html>)
+  &.ljust-tema {
+    color-scheme: light;
+  }
+  &.morkt-tema {
+    color-scheme: dark;
+  }
+}
+
+// Lokalt tema med annan densitet, t.ex. för en kompakt del av sidan.
+// Skriver bara ut densitets-variablerna; färg och typsnitt ärvs.
+@mixin density($density) {
+  @include mat.theme(
+    (
+      density: $density,
+    )
+  );
+}
