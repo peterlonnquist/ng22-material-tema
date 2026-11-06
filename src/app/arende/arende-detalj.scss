@@ -1,0 +1,24 @@
+:host {
+  display: block;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.beskrivning {
+  white-space: pre-line; // behåll radbrytningar från textarean
+  margin: 16px 0 0;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 16px 0 0;
+}
+dt {
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+dd {
+  margin: 0;
+}

@@ -1,0 +1,44 @@
+@if (arende(); as a) {
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{ a.titel }}</mat-card-title>
+      <mat-card-subtitle>Ärende {{ a.id }}, skapat {{ datum(a.skapad) }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (a.beskrivning) {
+        <p class="beskrivning">{{ a.beskrivning }}</p>
+      }
+      <dl>
+        <dt>Kategori</dt>
+        <dd>{{ kategori() }}</dd>
+        <dt>Prioritet</dt>
+        <dd>{{ prioritet() }}</dd>
+        <dt>Miljö</dt>
+        <dd>{{ miljo() }}</dd>
+        <dt>Kontakt</dt>
+        <dd>{{ a.kontakt }}</dd>
+        <dt>Uppskattad tid</dt>
+        <dd>{{ a.timmar ? a.timmar + ' timmar' : '–' }}</dd>
+        <dt>Deadline</dt>
+        <dd>{{ datum(a.deadline) }}</dd>
+      </dl>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <a matButton routerLink="/">Till start</a>
+      <a matButton="filled" routerLink="/skapa">Skapa nytt</a>
+    </mat-card-actions>
+  </mat-card>
+} @else {
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Ärendet hittades inte</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Ärendena sparas bara i minnet (se arende.service.ts) och försvinner vid omladdning -->
+      <p>Det finns inget ärende med id {{ id() }}.</p>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <a matButton="filled" routerLink="/skapa">Skapa ett ärende</a>
+    </mat-card-actions>
+  </mat-card>
+}

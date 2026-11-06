@@ -96,37 +96,13 @@
       </mat-form-field>
     </mat-card-content>
 
+    @if (sparfel(); as fel) {
+      <p class="serverfel" role="alert">{{ fel }}</p>
+    }
+
     <mat-card-actions align="end">
       <button matButton type="button" (click)="rensa()">Rensa</button>
-      <button matButton="filled" type="submit" [disabled]="arendeForm().submitting()">
-        Skapa
-      </button>
+      <button matButton="filled" type="submit" [disabled]="arendeForm().submitting()">Skapa</button>
     </mat-card-actions>
   </form>
 </mat-card>
-
-@if (skapat(); as a) {
-  <mat-card appearance="outlined" class="kvitto">
-    <mat-card-header>
-      <mat-card-title>Senast skapat</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <dl>
-        <dt>Titel</dt>
-        <dd>{{ a.titel }}</dd>
-        <dt>Kategori</dt>
-        <dd>{{ a.kategori }}</dd>
-        <dt>Prioritet</dt>
-        <dd>{{ a.prioritet }}</dd>
-        <dt>Miljö</dt>
-        <dd>{{ a.miljo }}</dd>
-        <dt>Kontakt</dt>
-        <dd>{{ a.kontakt }}</dd>
-        <dt>Tid</dt>
-        <dd>{{ a.timmar ?? '–' }} {{ a.timmar ? 'timmar' : '' }}</dd>
-        <dt>Deadline</dt>
-        <dd>{{ a.deadline?.toLocaleDateString('sv-SE') }}</dd>
-      </dl>
-    </mat-card-content>
-  </mat-card>
-}

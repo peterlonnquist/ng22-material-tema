@@ -12,13 +12,7 @@ import {
   required,
 } from '@angular/forms/signals';
 import { MatButton } from '@angular/material/button';
-import {
-  MatCard,
-  MatCardActions,
-  MatCardContent,
-  MatCardHeader,
-  MatCardTitle,
-} from '@angular/material/card';
+import { MatCard, MatCardActions, MatCardContent } from '@angular/material/card';
 import { MatOption } from '@angular/material/core';
 import {
   MatDatepicker,
@@ -30,6 +24,8 @@ import { MatInput } from '@angular/material/input';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { ArendeService } from '../arende/arende.service';
 import { KATEGORIER, MILJOER, NyttArende, PRIORITETER, TOMT_ARENDE } from './skapa.model';
 
 /** Dagens datum utan klockslag, så att idag räknas som giltig deadline. */
@@ -50,8 +46,6 @@ function idag(): Date {
     MatCard,
     MatCardActions,
     MatCardContent,
-    MatCardHeader,
-    MatCardTitle,
     MatDatepicker,
     MatDatepickerInput,
     MatDatepickerToggle,
@@ -70,6 +64,8 @@ function idag(): Date {
 })
 export class Skapa {
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly arendeService = inject(ArendeService);
 
   protected readonly kategorier = KATEGORIER;
   protected readonly prioriteter = PRIORITETER;
@@ -79,8 +75,8 @@ export class Skapa {
   /** Formulärets data. Signal Forms läser och skriver direkt i denna signal. */
   protected readonly arende = signal<NyttArende>({ ...TOMT_ARENDE });
 
-  /** Senast skapade ärende, visas som kvitto under formuläret. */
-  protected readonly skapat = signal<NyttArende | null>(null);
+  /** Felmeddelande om sparningen misslyckades, visas ovanför knapparna. */
+  protected readonly sparfel = signal<string | null>(null);
 
   protected readonly arendeForm = form(
     this.arende,
@@ -100,22 +96,32 @@ export class Skapa {
     {
       // Körs när formuläret skickas och är giltigt (via [formRoot] i mallen).
       // Är det ogiltigt markeras alla fält som touched så att felen visas.
+      // Medan action körs är submitting() sann: förloppsindikatorn visas och
+      // Skapa-knappen är avstängd, så man kan inte skapa samma ärende två gånger.
       submission: {
         action: async () => {
-          await this.sparaArende(this.arende());
+          this.sparfel.set(null);
+          try {
+            const arende = await this.arendeService.skapa(this.arende());
+            this.snackBar.open(`Ärendet "${arende.titel}" har skapats`, 'Stäng', {
+              duration: 4000,
+            });
+            // Navigera först när sparningen har lyckats
+            await this.router.navigate(['/arenden', arende.id]);
+          } catch {
+            // Stanna kvar med det ifyllda formuläret så att man kan försöka igen.
+            // Tillfälliga fel (nätverk, 500) returneras inte som valideringsfel:
+            // sådana gör formuläret ogiltigt tills ett värde ändras, och då går
+            // det inte att skicka samma data igen. Returnera fel från action bara
+            // för serverns valideringsfel, t.ex.
+            // { kind: 'upptagen', message: '...', fieldTree: this.arendeForm.kontakt }
+            this.sparfel.set('Kunde inte spara ärendet, försök igen');
+          }
           return undefined;
         },
       },
     },
   );
-
-  /** Fejkad sparning, byt mot ett riktigt API-anrop. */
-  private async sparaArende(arende: NyttArende): Promise<void> {
-    await new Promise((klar) => setTimeout(klar, 600));
-    this.skapat.set(arende);
-    this.snackBar.open(`Ärendet "${arende.titel}" har skapats`, 'Stäng', { duration: 4000 });
-    this.rensa();
-  }
 
   protected rensa(): void {
     this.arendeForm().reset({ ...TOMT_ARENDE });

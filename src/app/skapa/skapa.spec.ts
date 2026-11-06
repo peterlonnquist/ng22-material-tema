@@ -2,14 +2,16 @@ import { WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FieldTree, FormField, FormRoot } from '@angular/forms/signals';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideRouter, Router } from '@angular/router';
 import { MockBuilder, MockRender, NG_MOCKS_ROOT_PROVIDERS, ngMocks } from 'ng-mocks';
+import { Arende } from '../arende/arende.model';
+import { ArendeService } from '../arende/arende.service';
 import { Skapa } from './skapa';
 import { NyttArende } from './skapa.model';
 
 /** Ger testet åtkomst till komponentens skyddade medlemmar. */
 type SkapaInternt = {
   arende: WritableSignal<NyttArende>;
-  skapat: WritableSignal<NyttArende | null>;
   arendeForm: FieldTree<NyttArende>;
 };
 
@@ -20,13 +22,16 @@ function imorgon(): Date {
 
 describe('Skapa', () => {
   // Signal Forms (FormField, FormRoot) och deras interna tjänster i rotinjektorn
-  // testas på riktigt. Material-komponenterna och MatSnackBar mockas.
+  // testas på riktigt. Material-komponenterna, MatSnackBar och ArendeService mockas.
+  // Routern är riktig, men navigate() spioneras på i testerna.
   beforeEach(() =>
     MockBuilder(Skapa)
       .keep(FormField)
       .keep(FormRoot)
       .keep(NG_MOCKS_ROOT_PROVIDERS)
-      .mock(MatSnackBar),
+      .provide(provideRouter([]))
+      .mock(MatSnackBar)
+      .mock(ArendeService),
   );
 
   async function skapaSida() {
@@ -76,7 +81,7 @@ describe('Skapa', () => {
     expect(fel('deadline')).toEqual(['Välj ett datum']);
     expect(fel('prioritet')).toEqual([]);
     expect(komponent.arendeForm.titel().touched()).toBe(true);
-    expect(komponent.skapat()).toBeNull();
+    expect(TestBed.inject(ArendeService).skapa).not.toHaveBeenCalled();
   });
 
   it('validerar titelns längd, e-post, antal timmar och att datumet inte har passerat', async () => {
@@ -96,11 +101,9 @@ describe('Skapa', () => {
     expect(fel('deadline')).toEqual(['Datumet kan inte ha passerat']);
   });
 
-  it('skapar ärendet, visar en snackbar och tömmer formuläret när allt är giltigt', async () => {
-    const { fixture, komponent, skicka } = await skapaSida();
-    const snackBar = TestBed.inject(MatSnackBar);
-    const deadline = imorgon();
-    komponent.arende.set({
+  /** Fyller formuläret med giltiga värden. */
+  function fyllI(komponent: SkapaInternt): NyttArende {
+    const giltigt: NyttArende = {
       titel: 'Ny rapport',
       beskrivning: 'Månadsrapport för november',
       kategori: 'forbattring',
@@ -108,19 +111,56 @@ describe('Skapa', () => {
       miljo: 'test',
       kontakt: 'anna@example.com',
       timmar: 8,
-      deadline,
-    });
-    expect(komponent.arendeForm().valid()).toBe(true);
+      deadline: imorgon(),
+    };
+    komponent.arende.set(giltigt);
+    return giltigt;
+  }
+
+  it('sparar ärendet, visar en snackbar och navigerar till det nya ärendet', async () => {
+    const { komponent, skicka } = await skapaSida();
+    const arendeService = TestBed.inject(ArendeService);
+    const snackBar = TestBed.inject(MatSnackBar);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const ifyllt = fyllI(komponent);
+    vi.mocked(arendeService.skapa).mockResolvedValue({
+      ...ifyllt,
+      id: '42',
+      skapad: new Date(),
+    } satisfies Arende);
 
     await skicka();
-    await new Promise((klar) => setTimeout(klar, 700)); // fejkad sparning tar 600 ms
-    await fixture.whenStable();
 
-    expect(komponent.skapat()).toMatchObject({ titel: 'Ny rapport', miljo: 'test', deadline });
+    expect(arendeService.skapa).toHaveBeenCalledWith(ifyllt);
     expect(snackBar.open).toHaveBeenCalledWith('Ärendet "Ny rapport" har skapats', 'Stäng', {
       duration: 4000,
     });
-    expect(komponent.arende().titel).toBe('');
-    expect(komponent.arende().prioritet).toBe('normal');
+    expect(navigate).toHaveBeenCalledWith(['/arenden', '42']);
+  });
+
+  it('stannar kvar och visar ett fel om sparningen misslyckas, och går att skicka igen', async () => {
+    const { komponent, skicka } = await skapaSida();
+    const arendeService = TestBed.inject(ArendeService);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const ifyllt = fyllI(komponent);
+    vi.mocked(arendeService.skapa).mockRejectedValueOnce(new Error('500'));
+
+    await skicka();
+
+    expect(navigate).not.toHaveBeenCalled();
+    expect(ngMocks.formatText(ngMocks.find('.serverfel'))).toBe(
+      'Kunde inte spara ärendet, försök igen',
+    );
+    expect(komponent.arende()).toEqual(ifyllt); // inget av det ifyllda försvinner
+
+    // Andra försöket lyckas
+    vi.mocked(arendeService.skapa).mockResolvedValueOnce({
+      ...ifyllt,
+      id: '7',
+      skapad: new Date(),
+    });
+    await skicka();
+
+    expect(navigate).toHaveBeenCalledWith(['/arenden', '7']);
   });
 });
