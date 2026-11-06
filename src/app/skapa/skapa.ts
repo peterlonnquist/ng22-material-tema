@@ -11,13 +11,24 @@ import {
   minLength,
   required,
 } from '@angular/forms/signals';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
+import {
+  MatCard,
+  MatCardActions,
+  MatCardContent,
+  MatCardHeader,
+  MatCardTitle,
+} from '@angular/material/card';
+import { MatOption } from '@angular/material/core';
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerToggle,
+} from '@angular/material/datepicker';
+import { MatError, MatFormField, MatHint, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { KATEGORIER, MILJOER, NyttArende, PRIORITETER, TOMT_ARENDE } from './skapa.model';
 
@@ -30,16 +41,29 @@ function idag(): Date {
 /** Skapa-sidan: formulär byggt med Angular Signal Forms och Material-komponenter. */
 @Component({
   selector: 'app-skapa',
+  // Enskilda komponenter och direktiv i stället för hela moduler. Då varnar
+  // kompilatorn (NG8113) om något av dem inte längre används i mallen.
   imports: [
     FormField,
     FormRoot,
-    MatButtonModule,
-    MatCardModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressBarModule,
-    MatSelectModule,
+    MatButton,
+    MatCard,
+    MatCardActions,
+    MatCardContent,
+    MatCardHeader,
+    MatCardTitle,
+    MatDatepicker,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatError,
+    MatFormField,
+    MatHint,
+    MatInput,
+    MatLabel,
+    MatOption,
+    MatProgressBar,
+    MatSelect,
+    MatSuffix, // matTextSuffix och matIconSuffix
   ],
   templateUrl: './skapa.html',
   styleUrl: './skapa.scss',
