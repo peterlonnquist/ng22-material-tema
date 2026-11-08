@@ -4,10 +4,6 @@
 </section>
 
 <mat-card appearance="outlined">
-  @if (arendeForm().submitting()) {
-    <mat-progress-bar mode="indeterminate" />
-  }
-
   <!-- [formRoot] kopplar formuläret till <form>: stänger av webbläsarens validering
        och kör submission.action i skapa.ts när man trycker på Skapa -->
   <form [formRoot]="arendeForm">
@@ -98,7 +94,23 @@
 
     <mat-card-actions align="end">
       <button matButton type="button" (click)="rensa()">Rensa</button>
-      <button matButton="filled" type="submit" [disabled]="arendeForm().submitting()">Skapa</button>
+      <!-- showProgress döljer texten och visar spinnern i knappen, som behåller sin
+           bredd och färg. Knappen stängs inte av: Signal Forms ignorerar själv nya
+           försök att skicka medan en sparning pågår. -->
+      <button
+        matButton="filled"
+        type="submit"
+        [showProgress]="arendeForm().submitting()"
+        [attr.aria-busy]="arendeForm().submitting()"
+      >
+        Skapa
+        <mat-progress-spinner
+          progressIndicator
+          mode="indeterminate"
+          diameter="20"
+          aria-label="Sparar ärendet"
+        />
+      </button>
     </mat-card-actions>
   </form>
 </mat-card>

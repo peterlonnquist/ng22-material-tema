@@ -138,6 +138,34 @@ describe('Skapa', () => {
     expect(navigate).toHaveBeenCalledWith(['/arenden', '42']);
   });
 
+  it('visar spinner i Skapa-knappen och ignorerar nya klick medan ärendet sparas', async () => {
+    const { fixture, komponent } = await skapaSida();
+    const arendeService = TestBed.inject(ArendeService);
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const ifyllt = fyllI(komponent);
+    // Sparningen blir klar först när testet säger till
+    let blivKlar!: (arende: Arende) => void;
+    vi.mocked(arendeService.skapa).mockReturnValue(new Promise((klar) => (blivKlar = klar)));
+    const knapp = () => ngMocks.find('button[type=submit]');
+
+    expect(ngMocks.input(knapp(), 'showProgress')).toBe(false);
+
+    ngMocks.trigger(ngMocks.find('form'), 'submit');
+    fixture.detectChanges();
+
+    expect(ngMocks.input(knapp(), 'showProgress')).toBe(true);
+    expect(knapp().attributes['aria-busy']).toBe('true');
+
+    // Klick under sparningen ger inget nytt anrop
+    ngMocks.trigger(ngMocks.find('form'), 'submit');
+    expect(arendeService.skapa).toHaveBeenCalledTimes(1);
+
+    blivKlar({ ...ifyllt, id: '1', skapad: new Date() });
+    await fixture.whenStable();
+
+    expect(ngMocks.input(knapp(), 'showProgress')).toBe(false);
+  });
+
   // Själva feldialogen visas av httpFelInterceptor, se dess test
   it('stannar kvar med det ifyllda om sparningen misslyckas, och går att skicka igen', async () => {
     const { komponent, skicka } = await skapaSida();

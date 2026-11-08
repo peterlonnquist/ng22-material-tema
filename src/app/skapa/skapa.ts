@@ -21,7 +21,7 @@ import {
 } from '@angular/material/datepicker';
 import { MatError, MatFormField, MatHint, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -55,7 +55,7 @@ function idag(): Date {
     MatInput,
     MatLabel,
     MatOption,
-    MatProgressBar,
+    MatProgressSpinner,
     MatSelect,
     MatSuffix, // matTextSuffix och matIconSuffix
   ],
@@ -93,8 +93,9 @@ export class Skapa {
     {
       // Körs när formuläret skickas och är giltigt (via [formRoot] i mallen).
       // Är det ogiltigt markeras alla fält som touched så att felen visas.
-      // Medan action körs är submitting() sann: förloppsindikatorn visas och
-      // Skapa-knappen är avstängd, så man kan inte skapa samma ärende två gånger.
+      // Medan action körs är submitting() sann: Skapa-knappen visar en spinner,
+      // och nya försök att skicka ignoreras av Signal Forms, så man kan inte
+      // skapa samma ärende två gånger.
       submission: {
         action: async () => {
           try {
