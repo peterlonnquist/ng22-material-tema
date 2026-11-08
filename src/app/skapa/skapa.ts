@@ -75,9 +75,6 @@ export class Skapa {
   /** Formulärets data. Signal Forms läser och skriver direkt i denna signal. */
   protected readonly arende = signal<NyttArende>({ ...TOMT_ARENDE });
 
-  /** Felmeddelande om sparningen misslyckades, visas ovanför knapparna. */
-  protected readonly sparfel = signal<string | null>(null);
-
   protected readonly arendeForm = form(
     this.arende,
     (falt) => {
@@ -100,7 +97,6 @@ export class Skapa {
       // Skapa-knappen är avstängd, så man kan inte skapa samma ärende två gånger.
       submission: {
         action: async () => {
-          this.sparfel.set(null);
           try {
             const arende = await this.arendeService.skapa(this.arende());
             this.snackBar.open(`Ärendet "${arende.titel}" har skapats`, 'Stäng', {
@@ -109,13 +105,8 @@ export class Skapa {
             // Navigera först när sparningen har lyckats
             await this.router.navigate(['/arenden', arende.id]);
           } catch {
-            // Stanna kvar med det ifyllda formuläret så att man kan försöka igen.
-            // Tillfälliga fel (nätverk, 500) returneras inte som valideringsfel:
-            // sådana gör formuläret ogiltigt tills ett värde ändras, och då går
-            // det inte att skicka samma data igen. Returnera fel från action bara
-            // för serverns valideringsfel, t.ex.
-            // { kind: 'upptagen', message: '...', fieldTree: this.arendeForm.kontakt }
-            this.sparfel.set('Kunde inte spara ärendet, försök igen');
+            // Felet har redan visats i en dialog av httpFelInterceptor. Stanna
+            // kvar med det ifyllda formuläret så att man kan försöka igen.
           }
           return undefined;
         },

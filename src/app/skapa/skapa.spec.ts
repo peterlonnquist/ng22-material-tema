@@ -138,7 +138,8 @@ describe('Skapa', () => {
     expect(navigate).toHaveBeenCalledWith(['/arenden', '42']);
   });
 
-  it('stannar kvar och visar ett fel om sparningen misslyckas, och går att skicka igen', async () => {
+  // Själva feldialogen visas av httpFelInterceptor, se dess test
+  it('stannar kvar med det ifyllda om sparningen misslyckas, och går att skicka igen', async () => {
     const { komponent, skicka } = await skapaSida();
     const arendeService = TestBed.inject(ArendeService);
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
@@ -148,9 +149,6 @@ describe('Skapa', () => {
     await skicka();
 
     expect(navigate).not.toHaveBeenCalled();
-    expect(ngMocks.formatText(ngMocks.find('.serverfel'))).toBe(
-      'Kunde inte spara ärendet, försök igen',
-    );
     expect(komponent.arende()).toEqual(ifyllt); // inget av det ifyllda försvinner
 
     // Andra försöket lyckas

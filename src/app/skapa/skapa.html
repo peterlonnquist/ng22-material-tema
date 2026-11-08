@@ -96,10 +96,6 @@
       </mat-form-field>
     </mat-card-content>
 
-    @if (sparfel(); as fel) {
-      <p class="serverfel" role="alert">{{ fel }}</p>
-    }
-
     <mat-card-actions align="end">
       <button matButton type="button" (click)="rensa()">Rensa</button>
       <button matButton="filled" type="submit" [disabled]="arendeForm().submitting()">Skapa</button>

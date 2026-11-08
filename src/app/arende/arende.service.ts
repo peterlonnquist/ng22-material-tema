@@ -1,20 +1,25 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { NyttArende } from '../skapa/skapa.model';
 import { Arende } from './arende.model';
 
 /**
- * Sparar och hämtar ärenden. Fejkad: ärendena ligger bara i minnet och
- * försvinner vid omladdning. Byt mot HttpClient-anrop mot ett riktigt API.
+ * Sparar och hämtar ärenden. Sparar via POST /api/arenden, som just nu
+ * besvaras av fejkBackendInterceptor. Skapade ärenden sparas även i minnet
+ * så att detaljsidan kan visa dem, och försvinner vid omladdning.
+ *
+ * Fel visas av httpFelInterceptor. Anroparen får felet som ett avvisat
+ * Promise, men behöver inte visa något själv.
  */
 @Injectable({ providedIn: 'root' })
 export class ArendeService {
+  private readonly http = inject(HttpClient);
   private readonly arenden = signal<Arende[]>([]);
-  private nastaId = 1;
 
-  /** Sparar ett nytt ärende och returnerar det med id, som en server skulle göra. */
+  /** Sparar ett nytt ärende och returnerar det med id från servern. */
   async skapa(nytt: NyttArende): Promise<Arende> {
-    await new Promise((klar) => setTimeout(klar, 600)); // låtsas nätverksfördröjning
-    const arende: Arende = { ...nytt, id: String(this.nastaId++), skapad: new Date() };
+    const arende = await firstValueFrom(this.http.post<Arende>('/api/arenden', nytt));
     this.arenden.update((lista) => [...lista, arende]);
     return arende;
   }

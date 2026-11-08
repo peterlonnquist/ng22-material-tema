@@ -24,7 +24,8 @@ npm run build
 | `src/app/app.routes.ts` | Routes: `/` (startsidan), `/skapa` (formuläret) och `/arenden/:id` (ett ärende), alla lazy-laddade |
 | `src/app/start/` | Startsidan som visar temat på Material-komponenter |
 | `src/app/skapa/` | Skapa-sidan: formulär med Angular Signal Forms, Material-select, textfält och datumväljare |
-| `src/app/arende/` | `ArendeService` (fejkad sparning i minnet) och detaljsidan för ett ärende |
+| `src/app/arende/` | `ArendeService` (POST `/api/arenden`), detaljsidan för ett ärende och `fejkBackendInterceptor` som svarar i stället för en riktig server |
+| `src/app/fel/` | `httpFelInterceptor`: global felhantering som visar `FelDialog` (Material-dialog) när ett API-anrop misslyckas |
 | `src/app/tema/tema.service.ts` | Växlar ljust, mörkt eller systemläge genom att sätta en klass på `<html>` |
 | `src/app/app.scss` | Stilar för appens ram (toolbar och meny), använder bara `--mat-sys-*`-variabler |
 
@@ -44,5 +45,5 @@ En helt egen palett genereras med `ng generate @angular/material:theme-color`.
 - **Komponenttokens** skrivs över med `mat.button-overrides()`, `mat.toolbar-overrides()`, `mat.card-overrides()`, `mat.fab-overrides()` och `mat.button-toggle-overrides()`.
 - **Lokalt tema**: `.kompakt` anropar `mat.theme((density: -2))` för en del av sidan.
 - **Egna komponenter** stylas med `var(--mat-sys-…)` så att de följer temat automatiskt.
-- **Formulär med Signal Forms** på `/skapa`: `form()` med schema för validering (`required`, `minLength`, `email`, `min`/`max`, `minDate`), `[formField]` på Material-fälten och `[formRoot]` på `<form>` för att skicka. Datumväljaren använder `provideNativeDateAdapter()` med svenskt format. Efter lyckad sparning navigerar sidan till `/arenden/:id`, där `:id` blir en input på detaljsidan via `withComponentInputBinding()`. Om sparningen misslyckas stannar man kvar med ett felmeddelande.
+- **Formulär med Signal Forms** på `/skapa`: `form()` med schema för validering (`required`, `minLength`, `email`, `min`/`max`, `minDate`), `[formField]` på Material-fälten och `[formRoot]` på `<form>` för att skicka. Datumväljaren använder `provideNativeDateAdapter()` med svenskt format. Efter lyckad sparning navigerar sidan till `/arenden/:id`, där `:id` blir en input på detaljsidan via `withComponentInputBinding()`. Om sparningen misslyckas visar `httpFelInterceptor` en feldialog och man stannar kvar med det ifyllda formuläret. Skriv "500" i titeln för att prova.
 - **Tester med ng-mocks**: alla specar använder `MockBuilder`/`MockRender`. Material-komponenter mockas, det som testas behålls med `.keep()`. `src/test-setup.ts` gör mockade metoder till `vi.fn()` via `ngMocks.autoSpy('vitest')`.
