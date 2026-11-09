@@ -26,7 +26,8 @@ npm run build
 | `src/app/skapa/` | Skapa-sidan: formulär med Angular Signal Forms, Material-select, textfält och datumväljare |
 | `src/app/arende/` | `ArendeService` (POST `/api/arenden`), detaljsidan för ett ärende och `fejkBackendInterceptor` som svarar i stället för en riktig server |
 | `src/app/inlagg/` | `InlaggService` med `httpResource` som tar en signal som parameter. `InlaggSida` listar användarna, `AnvandarensInlagg` visar inläggen för `:anvandarId` i URL:en |
-| `src/app/fel/` | `httpFelInterceptor`: global felhantering som visar `FelDialog` (Material-dialog) när ett API-anrop misslyckas |
+| `src/app/dialog/` | `DialogService.show(Komponent, data)`: visar valfri dialogkomponent som ärver `AppDialog<Data, Resultat>`, med typkontroll av data och resultat. `showMessage({ typ, ... })` visar färdiga meddelanden (`info`, `lyckat`, `varning`, `fel`). `BekraftaDialog` är ett exempel på egen dialog, används när man rensar skapa-formuläret |
+| `src/app/fel/` | `httpFelInterceptor`: global felhantering som visar en feldialog via `DialogService` när ett API-anrop misslyckas |
 | `src/app/tema/tema.service.ts` | Växlar ljust, mörkt eller systemläge genom att sätta en klass på `<html>` |
 | `src/app/app.scss` | Stilar för appens ram (toolbar och meny), använder bara `--mat-sys-*`-variabler |
 

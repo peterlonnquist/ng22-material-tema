@@ -5,9 +5,9 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { catchError, throwError } from 'rxjs';
-import { FelDialog, FelDialogData } from './fel-dialog';
+import { DialogService } from '../dialog/dialog.service';
+import { MeddelandeDialogData } from '../dialog/meddelande-dialog';
 
 /** Bara anrop mot appens API visar feldialog, inte t.ex. ikoner under /assets/. */
 const API_PREFIX = '/api/';
@@ -21,26 +21,23 @@ const API_PREFIX = '/api/';
 export const VISA_FELDIALOG = new HttpContextToken<boolean>(() => true);
 
 /**
- * Global felhantering för HTTP: visar en Material-dialog när ett API-anrop
- * misslyckas. Felet skickas sedan vidare, så att den som anropade kan avbryta
+ * Global felhantering för HTTP: visar en feldialog via DialogService när ett
+ * API-anrop misslyckas. Felet skickas sedan vidare, så att den som anropade kan avbryta
  * det den höll på med (t.ex. inte navigera vidare), men behöver inte visa något.
  */
 export const httpFelInterceptor: HttpInterceptorFn = (req, next) => {
-  const dialog = inject(MatDialog);
+  const dialoger = inject(DialogService);
 
   return next(req).pipe(
     catchError((fel: unknown) => {
       if (
         fel instanceof HttpErrorResponse &&
         req.url.startsWith(API_PREFIX) &&
-        req.context.get(VISA_FELDIALOG) &&
-        // Visa bara en feldialog åt gången, även om flera anrop misslyckas samtidigt
-        !dialog.openDialogs.some((d) => d.componentInstance instanceof FelDialog)
+        req.context.get(VISA_FELDIALOG)
       ) {
-        dialog.open<FelDialog, FelDialogData>(FelDialog, {
-          data: tillDialogData(fel, req),
-          width: '420px',
-        });
+        // DialogService visar bara en feldialog åt gången, även om flera anrop
+        // misslyckas samtidigt. Interceptorn väntar inte på att den stängs.
+        void dialoger.showMessage(tillDialogData(fel, req));
       }
       return throwError(() => fel);
     }),
@@ -48,13 +45,14 @@ export const httpFelInterceptor: HttpInterceptorFn = (req, next) => {
 };
 
 /** Översätter HTTP-felet till text som användaren förstår. */
-function tillDialogData(fel: HttpErrorResponse, req: HttpRequest<unknown>): FelDialogData {
+function tillDialogData(fel: HttpErrorResponse, req: HttpRequest<unknown>): MeddelandeDialogData {
   const detaljer = `HTTP ${fel.status} · ${req.method} ${req.url}`;
   // Valideringsfel från servern brukar ha ett eget meddelande i svaret
   const serverMeddelande: unknown = fel.error?.message;
 
   if (fel.status === 0) {
     return {
+      typ: 'fel',
       rubrik: 'Ingen kontakt med servern',
       meddelande: 'Kontrollera din internetanslutning och försök igen.',
       detaljer,
@@ -62,18 +60,25 @@ function tillDialogData(fel: HttpErrorResponse, req: HttpRequest<unknown>): FelD
   }
   if (fel.status === 401 || fel.status === 403) {
     return {
+      typ: 'fel',
       rubrik: 'Behörighet saknas',
       meddelande: 'Du har inte behörighet att göra detta.',
       detaljer,
     };
   }
   if (fel.status === 404) {
-    return { rubrik: 'Hittades inte', meddelande: 'Det du letade efter finns inte.', detaljer };
+    return {
+      typ: 'fel',
+      rubrik: 'Hittades inte',
+      meddelande: 'Det du letade efter finns inte.',
+      detaljer,
+    };
   }
   if (fel.status >= 400 && fel.status < 500 && typeof serverMeddelande === 'string') {
-    return { rubrik: 'Kunde inte genomföras', meddelande: serverMeddelande, detaljer };
+    return { typ: 'fel', rubrik: 'Kunde inte genomföras', meddelande: serverMeddelande, detaljer };
   }
   return {
+    typ: 'fel',
     rubrik: 'Något gick fel',
     meddelande: 'Ett oväntat fel uppstod. Försök igen om en stund.',
     detaljer,

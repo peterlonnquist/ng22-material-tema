@@ -6,6 +6,8 @@ import { provideRouter, Router } from '@angular/router';
 import { MockBuilder, MockRender, NG_MOCKS_ROOT_PROVIDERS, ngMocks } from 'ng-mocks';
 import { Arende } from '../arende/arende.model';
 import { ArendeService } from '../arende/arende.service';
+import { BekraftaDialog } from '../dialog/bekrafta-dialog';
+import { DialogService } from '../dialog/dialog.service';
 import { Skapa } from './skapa';
 import { NyttArende } from './skapa.model';
 
@@ -31,7 +33,8 @@ describe('Skapa', () => {
       .keep(NG_MOCKS_ROOT_PROVIDERS)
       .provide(provideRouter([]))
       .mock(MatSnackBar)
-      .mock(ArendeService),
+      .mock(ArendeService)
+      .mock(DialogService),
   );
 
   async function skapaSida() {
@@ -188,5 +191,43 @@ describe('Skapa', () => {
     await skicka();
 
     expect(navigate).toHaveBeenCalledWith(['/arenden', '7']);
+  });
+
+  describe('rensa', () => {
+    /** Klickar på Rensa och väntar in dialogen. */
+    async function klickaRensa(fixture: { whenStable(): Promise<unknown> }) {
+      ngMocks.click(ngMocks.find('button[type=button]'));
+      await fixture.whenStable();
+    }
+
+    it('rensar direkt utan fråga när inget är ifyllt', async () => {
+      const { fixture } = await skapaSida();
+
+      await klickaRensa(fixture);
+
+      expect(TestBed.inject(DialogService).show).not.toHaveBeenCalled();
+    });
+
+    it('frågar först, och rensar bara om man bekräftar', async () => {
+      const { fixture, komponent } = await skapaSida();
+      const dialog = TestBed.inject(DialogService);
+      ngMocks.change('input[matInput]', 'Något ifyllt');
+      await fixture.whenStable();
+
+      // Avbryt: allt finns kvar
+      vi.mocked(dialog.show).mockResolvedValue(false);
+      await klickaRensa(fixture);
+      expect(dialog.show).toHaveBeenCalledWith(BekraftaDialog, {
+        rubrik: 'Rensa formuläret?',
+        fraga: 'Det du har fyllt i försvinner.',
+        ja: 'Rensa',
+      });
+      expect(komponent.arende().titel).toBe('Något ifyllt');
+
+      // Bekräfta: formuläret töms
+      vi.mocked(dialog.show).mockResolvedValue(true);
+      await klickaRensa(fixture);
+      expect(komponent.arende().titel).toBe('');
+    });
   });
 });

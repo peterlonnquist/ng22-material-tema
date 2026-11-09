@@ -26,6 +26,8 @@ import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ArendeService } from '../arende/arende.service';
+import { BekraftaDialog } from '../dialog/bekrafta-dialog';
+import { DialogService } from '../dialog/dialog.service';
 import { KATEGORIER, MILJOER, NyttArende, PRIORITETER, TOMT_ARENDE } from './skapa.model';
 
 /** Dagens datum utan klockslag, så att idag räknas som giltig deadline. */
@@ -66,6 +68,7 @@ export class Skapa {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
   private readonly arendeService = inject(ArendeService);
+  private readonly dialog = inject(DialogService);
 
   protected readonly kategorier = KATEGORIER;
   protected readonly prioriteter = PRIORITETER;
@@ -115,7 +118,18 @@ export class Skapa {
     },
   );
 
-  protected rensa(): void {
+  /** Rensar formuläret. Har man fyllt i något frågar en dialog först. */
+  protected async rensa(): Promise<void> {
+    if (this.arendeForm().dirty()) {
+      const ja = await this.dialog.show(BekraftaDialog, {
+        rubrik: 'Rensa formuläret?',
+        fraga: 'Det du har fyllt i försvinner.',
+        ja: 'Rensa',
+      });
+      if (!ja) {
+        return;
+      }
+    }
     this.arendeForm().reset({ ...TOMT_ARENDE });
   }
 }
