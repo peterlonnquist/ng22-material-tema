@@ -1,6 +1,6 @@
-import { Signal } from '@angular/core';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
-import { fakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
+import type { Mock } from 'vitest';
+import { createFakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
 import { AnvandarensInlagg } from './anvandarens-inlagg';
 import { InlaggVy } from './inlagg.model';
 import { InlaggService } from './inlagg.service';
@@ -8,17 +8,13 @@ import { InlaggService } from './inlagg.service';
 describe('AnvandarensInlagg', () => {
   // InlaggService mockas: inlagg() ger en fejkad resurs som testet styr.
   // Hämtning, avbrytning och parse testas i inlagg.service.spec.ts.
-  let inlagg: FakeHttpResource<InlaggVy[]>;
-  let skickatId: Signal<string>;
+  let fakeHttpResource: FakeHttpResource<InlaggVy[]>;
+  let inlaggSpion: Mock<InlaggService['inlagg']>;
 
   beforeEach(() => {
-    inlagg = fakeHttpResource<InlaggVy[]>([]);
-    return MockBuilder(AnvandarensInlagg).mock(InlaggService, {
-      inlagg: (id: Signal<string>) => {
-        skickatId = id;
-        return inlagg;
-      },
-    });
+    fakeHttpResource = createFakeHttpResource<InlaggVy[]>([]);
+    inlaggSpion = vi.fn(() => fakeHttpResource);
+    return MockBuilder(AnvandarensInlagg).mock(InlaggService, { inlagg: inlaggSpion });
   });
 
   /** Renderar med anvandarId som input, som routern gör från URL:en. */
@@ -30,21 +26,32 @@ describe('AnvandarensInlagg', () => {
     return { fixture, uppdatera, text };
   }
 
+  it('hämtar inläggen för användaren med id:t från URL:en', () => {
+    visa('3');
+
+    expect(inlaggSpion).toHaveBeenCalledTimes(1);
+    // inlagg() får en signal, inte en sträng, så värdet läses ur signalen
+    const [id] = inlaggSpion.mock.calls[0];
+    expect(id()).toBe('3');
+  });
+
   it('skickar id från URL:en till tjänsten som signal, så att ändringar följer med', () => {
     const { fixture, uppdatera } = visa('2');
-    expect(skickatId()).toBe('2');
+    const [id] = inlaggSpion.mock.lastCall!; // signalen komponenten skickade
+    expect(id()).toBe('2');
 
     // Som när routern återanvänder komponenten för /inlagg/5
     fixture.componentInstance.anvandarId = '5';
     uppdatera();
 
-    expect(skickatId()).toBe('5'); // samma signal, inte ett kopierat värde
+    expect(id()).toBe('5'); // samma signal, inte ett kopierat värde
+    expect(inlaggSpion).toHaveBeenCalledTimes(1); // resursen skapas inte om
   });
 
   it('visar en förloppsindikator medan inläggen hämtas', () => {
     const { uppdatera, text } = visa();
 
-    inlagg.loading();
+    fakeHttpResource.loading();
     uppdatera();
 
     expect(ngMocks.find('mat-progress-bar', null)).not.toBeNull();
@@ -54,7 +61,7 @@ describe('AnvandarensInlagg', () => {
   it('visar inläggen med antal ord', () => {
     const { uppdatera, text } = visa();
 
-    inlagg.resolve([
+    fakeHttpResource.resolve([
       { id: 11, userId: 2, title: 'et ea vero quia', body: '…', antalOrd: 24 },
       { id: 12, userId: 2, title: 'in quibusdam', body: '…', antalOrd: 1 },
     ]);
@@ -68,7 +75,7 @@ describe('AnvandarensInlagg', () => {
   it('visar ett meddelande när användaren saknar inlägg', () => {
     const { uppdatera, text } = visa();
 
-    inlagg.resolve([]);
+    fakeHttpResource.resolve([]);
     uppdatera();
 
     expect(text('.tips')).toEqual(['Användaren har inga inlägg.']);
@@ -77,7 +84,7 @@ describe('AnvandarensInlagg', () => {
   it('visar ett fel och laddar om med "Försök igen"', () => {
     const { uppdatera, text } = visa();
 
-    inlagg.fail();
+    fakeHttpResource.fail();
     uppdatera();
 
     expect(text('.fel p')).toEqual(['Kunde inte hämta inläggen.']);
@@ -85,6 +92,6 @@ describe('AnvandarensInlagg', () => {
 
     ngMocks.click(ngMocks.find('.fel button'));
 
-    expect(inlagg.reload).toHaveBeenCalledTimes(1);
+    expect(fakeHttpResource.reload).toHaveBeenCalledTimes(1);
   });
 });

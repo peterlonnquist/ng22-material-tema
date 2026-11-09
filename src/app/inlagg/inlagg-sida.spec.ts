@@ -1,6 +1,6 @@
 import { provideRouter, RouterLink, RouterOutlet } from '@angular/router';
 import { MockBuilder, MockRender, NG_MOCKS_ROOT_PROVIDERS, ngMocks } from 'ng-mocks';
-import { fakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
+import { createFakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
 import { InlaggSida } from './inlagg-sida';
 import { Anvandare } from './inlagg.model';
 import { InlaggService } from './inlagg.service';
@@ -8,22 +8,22 @@ import { InlaggService } from './inlagg.service';
 describe('InlaggSida', () => {
   // InlaggService mockas: anvandare() ger en fejkad resurs som testet styr.
   // Routern är riktig för att kunna kontrollera länkarna.
-  let anvandare: FakeHttpResource<Anvandare[]>;
+  let fakeHttpResource: FakeHttpResource<Anvandare[]>;
 
   beforeEach(() => {
-    anvandare = fakeHttpResource<Anvandare[]>([]);
+    fakeHttpResource = createFakeHttpResource<Anvandare[]>([]);
     return MockBuilder(InlaggSida)
       .keep(RouterLink)
       .keep(RouterOutlet)
       .keep(NG_MOCKS_ROOT_PROVIDERS)
       .provide(provideRouter([]))
-      .mock(InlaggService, { anvandare: () => anvandare });
+      .mock(InlaggService, { anvandare: () => fakeHttpResource });
   });
 
   it('visar användarna som länkar och ett tips innan någon är vald', () => {
     const fixture = MockRender(InlaggSida);
 
-    anvandare.resolve([
+    fakeHttpResource.resolve([
       { id: 1, name: 'Leanne Graham', email: 'a@example.com' },
       { id: 2, name: 'Ervin Howell', email: 'b@example.com' },
     ]);
@@ -42,7 +42,7 @@ describe('InlaggSida', () => {
   it('visar ett fel om användarna inte gick att hämta', () => {
     const fixture = MockRender(InlaggSida);
 
-    anvandare.fail();
+    fakeHttpResource.fail();
     fixture.detectChanges();
 
     expect(ngMocks.formatText(ngMocks.find('.fel'))).toBe('Kunde inte hämta användarna.');

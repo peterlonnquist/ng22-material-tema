@@ -1,33 +1,44 @@
-import { fakeHttpResource } from './fake-http-resource';
+import { createFakeHttpResource } from './fake-http-resource';
 
-describe('fakeHttpResource', () => {
+describe('createFakeHttpResource', () => {
   it('börjar i idle med startvärdet', () => {
-    const resource = fakeHttpResource<string[]>([]);
+    const fakeHttpResource = createFakeHttpResource<string[]>([]);
 
-    expect(resource.status()).toBe('idle');
-    expect(resource.value()).toEqual([]);
-    expect(resource.isLoading()).toBe(false);
+    expect(fakeHttpResource.status()).toBe('idle');
+    expect(fakeHttpResource.value()).toEqual([]);
+    expect(fakeHttpResource.isLoading()).toBe(false);
+  });
+
+  it('har value() undefined utan startvärde, som httpResource utan defaultValue', () => {
+    const fakeHttpResource = createFakeHttpResource<{ id: number }>();
+
+    expect(fakeHttpResource.value()).toBeUndefined();
+    expect(fakeHttpResource.hasValue()).toBe(false);
+
+    fakeHttpResource.resolve({ id: 1 });
+    expect(fakeHttpResource.value()).toEqual({ id: 1 });
+    expect(fakeHttpResource.hasValue()).toBe(true);
   });
 
   it('hämtar och svarar', () => {
-    const resource = fakeHttpResource<string[]>([]);
+    const fakeHttpResource = createFakeHttpResource<string[]>([]);
 
-    resource.loading();
-    expect(resource.isLoading()).toBe(true);
+    fakeHttpResource.loading();
+    expect(fakeHttpResource.isLoading()).toBe(true);
 
-    resource.resolve(['a']);
-    expect(resource.isLoading()).toBe(false);
-    expect(resource.value()).toEqual(['a']);
+    fakeHttpResource.resolve(['a']);
+    expect(fakeHttpResource.isLoading()).toBe(false);
+    expect(fakeHttpResource.value()).toEqual(['a']);
   });
 
   it('har fel och kastar från value() i felläge, som en riktig resurs', () => {
-    const resource = fakeHttpResource<string[]>([]);
+    const fakeHttpResource = createFakeHttpResource<string[]>([]);
     const error = new Error('500');
 
-    resource.fail(error);
+    fakeHttpResource.fail(error);
 
-    expect(resource.error()).toBe(error);
-    expect(resource.hasValue()).toBe(false);
-    expect(() => resource.value()).toThrow();
+    expect(fakeHttpResource.error()).toBe(error);
+    expect(fakeHttpResource.hasValue()).toBe(false);
+    expect(() => fakeHttpResource.value()).toThrow();
   });
 });
