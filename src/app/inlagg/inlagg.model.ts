@@ -16,6 +16,9 @@ export interface Inlagg {
   body: string;
 }
 
+/** Det som skickas för att skapa ett inlägg, POST /posts. Servern sätter id. */
+export type NyttInlagg = Omit<Inlagg, 'id'>;
+
 /** Ett inlägg som det visas i appen: API:ts fält plus beräknade fält. */
 export interface InlaggVy extends Inlagg {
   antalOrd: number;

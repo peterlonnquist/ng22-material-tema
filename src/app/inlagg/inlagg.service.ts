@@ -1,18 +1,31 @@
-import { httpResource } from '@angular/common/http';
-import { Injectable, Signal } from '@angular/core';
-import { Anvandare, Inlagg, InlaggVy } from './inlagg.model';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { inject, Injectable, Signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { Anvandare, Inlagg, InlaggVy, NyttInlagg } from './inlagg.model';
 
 export const JSONPLACEHOLDER_URL = 'https://jsonplaceholder.typicode.com';
 
+/** Lägger till antal ord på ett inlägg från API:t. */
+function tillVy(inlagg: Inlagg): InlaggVy {
+  return { ...inlagg, antalOrd: inlagg.body.split(/\s+/).length };
+}
+
 /**
- * Hämtar användare och inlägg från JSONPlaceholder med httpResource.
+ * Användare och inlägg från JSONPlaceholder.
  *
- * Metoderna skapar en resurs och måste därför anropas i ett
- * injektionssammanhang, t.ex. som fältinitierare i en komponent. Resursen
- * lever då lika länge som komponenten och avbryts när den förstörs.
+ * Läsning görs med httpResource: anvandare() och inlagg() skapar en resurs
+ * och måste därför anropas i ett injektionssammanhang, t.ex. som
+ * fältinitierare i en komponent. Resursen lever då lika länge som
+ * komponenten och avbryts när den förstörs.
+ *
+ * Skrivning görs med HttpClient: skapa(). httpResource är till för att läsa.
+ * En resurs hämtar på nytt och avbryter pågående anrop när parametrarna
+ * ändras, och det vill man inte att en sparning gör.
  */
 @Injectable({ providedIn: 'root' })
 export class InlaggService {
+  private readonly http = inject(HttpClient);
+
   /** Alla användare. Hämtas en gång, när resursen skapas. */
   anvandare() {
     return httpResource<Anvandare[]>(() => `${JSONPLACEHOLDER_URL}/users`, { defaultValue: [] });
@@ -34,12 +47,22 @@ export class InlaggService {
         defaultValue: [],
         // Körs en gång per svar. Det som returneras här blir value().
         // Kastar parse ett fel hamnar resursen i felläge, precis som vid HTTP-fel.
-        parse: (svar) =>
-          (svar as Inlagg[]).map((inlagg) => ({
-            ...inlagg,
-            antalOrd: inlagg.body.split(/\s+/).length,
-          })),
+        parse: (svar) => (svar as Inlagg[]).map(tillVy),
       },
     );
+  }
+
+  /**
+   * Skapar ett inlägg: POST /posts. Returnerar inlägget med id från servern
+   * och antal ord, i samma form som inlagg() ger.
+   *
+   * JSONPlaceholder sparar inte på riktigt: svaret har alltid id 101 och
+   * inlägget syns inte i senare GET-anrop.
+   */
+  async skapa(nytt: NyttInlagg): Promise<InlaggVy> {
+    const inlagg = await firstValueFrom(
+      this.http.post<Inlagg>(`${JSONPLACEHOLDER_URL}/posts`, nytt),
+    );
+    return tillVy(inlagg);
   }
 }

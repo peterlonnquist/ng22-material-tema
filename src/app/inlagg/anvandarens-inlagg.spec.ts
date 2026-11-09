@@ -1,4 +1,7 @@
-import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
+import { TestBed } from '@angular/core/testing';
+import { FieldTree, FormField, FormRoot } from '@angular/forms/signals';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MockBuilder, MockRender, NG_MOCKS_ROOT_PROVIDERS, ngMocks } from 'ng-mocks';
 import type { Mock } from 'vitest';
 import { createFakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
 import { AnvandarensInlagg } from './anvandarens-inlagg';
@@ -6,15 +9,23 @@ import { InlaggVy } from './inlagg.model';
 import { InlaggService } from './inlagg.service';
 
 describe('AnvandarensInlagg', () => {
-  // InlaggService mockas: inlagg() ger en fejkad resurs som testet styr.
-  // Hämtning, avbrytning och parse testas i inlagg.service.spec.ts.
+  // InlaggService mockas: inlagg() ger en fejkad resurs som testet styr och
+  // skapa() är en spion. Hämtning, POST och parse testas i inlagg.service.spec.ts.
+  // Signal Forms och deras rottjänster körs på riktigt, MatSnackBar mockas.
   let fakeHttpResource: FakeHttpResource<InlaggVy[]>;
   let inlaggSpion: Mock<InlaggService['inlagg']>;
+  let skapaSpion: Mock<InlaggService['skapa']>;
 
   beforeEach(() => {
     fakeHttpResource = createFakeHttpResource<InlaggVy[]>([]);
     inlaggSpion = vi.fn(() => fakeHttpResource);
-    return MockBuilder(AnvandarensInlagg).mock(InlaggService, { inlagg: inlaggSpion });
+    skapaSpion = vi.fn();
+    return MockBuilder(AnvandarensInlagg)
+      .keep(FormField)
+      .keep(FormRoot)
+      .keep(NG_MOCKS_ROOT_PROVIDERS)
+      .mock(MatSnackBar)
+      .mock(InlaggService, { inlagg: inlaggSpion, skapa: skapaSpion });
   });
 
   /** Renderar med anvandarId som input, som routern gör från URL:en. */
@@ -23,7 +34,18 @@ describe('AnvandarensInlagg', () => {
     /** Uppdaterar vyn efter att testet ändrat resursens läge. */
     const uppdatera = () => fixture.detectChanges();
     const text = (sel: string) => ngMocks.findAll(sel).map((el) => ngMocks.formatText(el));
-    return { fixture, uppdatera, text };
+    /** Fyller i formuläret för nytt inlägg. */
+    const fyllI = async (titel: string, brodtext: string) => {
+      ngMocks.change('input[matInput]', titel);
+      ngMocks.change('textarea[matInput]', brodtext);
+      await fixture.whenStable();
+    };
+    /** Skickar formuläret och väntar tills det är klart. */
+    const publicera = async () => {
+      ngMocks.trigger(ngMocks.find('form'), 'submit');
+      await fixture.whenStable();
+    };
+    return { fixture, uppdatera, text, fyllI, publicera };
   }
 
   it('hämtar inläggen för användaren med id:t från URL:en', () => {
@@ -93,5 +115,67 @@ describe('AnvandarensInlagg', () => {
     ngMocks.click(ngMocks.find('.fel button'));
 
     expect(fakeHttpResource.reload).toHaveBeenCalledTimes(1);
+  });
+
+  describe('nytt inlägg', () => {
+    const SKAPAT: InlaggVy = {
+      id: 101,
+      userId: 3,
+      title: 'Hej',
+      body: 'Ett nytt inlägg',
+      antalOrd: 3,
+    };
+
+    it('kräver titel och text, och skickar inget annars', async () => {
+      const { publicera, text } = visa('3');
+
+      await publicera();
+
+      expect(text('mat-error')).toEqual(['Ange en titel', 'Skriv något']);
+      expect(skapaSpion).not.toHaveBeenCalled();
+    });
+
+    it('publicerar för användaren i URL:en och lägger det nya inlägget först i listan', async () => {
+      const { fixture, fyllI, publicera, text } = visa('3');
+      fakeHttpResource.resolve([
+        { id: 21, userId: 3, title: 'asperiores ea ipsam', body: '…', antalOrd: 24 },
+      ]);
+      skapaSpion.mockResolvedValue(SKAPAT);
+
+      await fyllI('Hej', 'Ett nytt inlägg');
+      await publicera();
+
+      expect(skapaSpion).toHaveBeenCalledWith({ userId: 3, title: 'Hej', body: 'Ett nytt inlägg' });
+      expect(text('.lista mat-card-title')).toEqual(['Hej', 'asperiores ea ipsam']);
+      expect(TestBed.inject(MatSnackBar).open).toHaveBeenCalledWith(
+        'Inlägget har publicerats',
+        'Stäng',
+        { duration: 4000 },
+      );
+      // Formuläret töms och är orört igen, så att mat-form-field inte visar
+      // "Ange en titel" fast fälten är tomma
+      const komponent = fixture.point.componentInstance as unknown as {
+        nyttForm: FieldTree<{ titel: string; text: string }>;
+      };
+      expect(ngMocks.find<HTMLInputElement>('input[matInput]').nativeElement.value).toBe('');
+      expect(komponent.nyttForm().touched()).toBe(false);
+    });
+
+    it('visar ett fel och behåller det ifyllda om publiceringen misslyckas', async () => {
+      const { fyllI, publicera, text } = visa('3');
+      fakeHttpResource.resolve([]);
+      skapaSpion.mockRejectedValue(new Error('500'));
+
+      await fyllI('Hej', 'Ett nytt inlägg');
+      await publicera();
+
+      expect(TestBed.inject(MatSnackBar).open).toHaveBeenCalledWith(
+        'Kunde inte publicera inlägget, försök igen',
+        'Stäng',
+        { duration: 6000 },
+      );
+      expect(ngMocks.find<HTMLInputElement>('input[matInput]').nativeElement.value).toBe('Hej');
+      expect(text('.lista mat-card-title')).toEqual([]);
+    });
   });
 });

@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MockBuilder } from 'ng-mocks';
-import { Inlagg } from './inlagg.model';
+import { Inlagg, NyttInlagg } from './inlagg.model';
 import { InlaggService, JSONPLACEHOLDER_URL } from './inlagg.service';
 
 const INLAGG: Inlagg[] = [
@@ -63,5 +63,30 @@ describe('InlaggService', () => {
     await vantaPaResurser();
 
     expect(anvandare.value().map((a) => a.name)).toEqual(['Leanne Graham']);
+  });
+
+  describe('skapa', () => {
+    const NYTT: NyttInlagg = { userId: 3, title: 'Hej', body: 'Ett nytt inlägg' };
+
+    it('skickar inlägget med POST och returnerar det med id och antal ord', async () => {
+      const svar = TestBed.inject(InlaggService).skapa(NYTT);
+
+      const anrop = TestBed.inject(HttpTestingController).expectOne(`${JSONPLACEHOLDER_URL}/posts`);
+      expect(anrop.request.method).toBe('POST');
+      expect(anrop.request.body).toEqual(NYTT);
+      anrop.flush({ ...NYTT, id: 101 });
+
+      expect(await svar).toEqual({ ...NYTT, id: 101, antalOrd: 3 });
+    });
+
+    it('skickar vidare felet om anropet misslyckas', async () => {
+      const svar = TestBed.inject(InlaggService).skapa(NYTT);
+
+      TestBed.inject(HttpTestingController)
+        .expectOne(`${JSONPLACEHOLDER_URL}/posts`)
+        .flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+      await expect(svar).rejects.toMatchObject({ status: 500 });
+    });
   });
 });

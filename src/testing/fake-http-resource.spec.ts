@@ -41,4 +41,17 @@ describe('createFakeHttpResource', () => {
     expect(fakeHttpResource.hasValue()).toBe(false);
     expect(() => fakeHttpResource.value()).toThrow();
   });
+
+  it('ändrar värdet lokalt med set() och update(), som en riktig resurs', () => {
+    const fakeHttpResource = createFakeHttpResource<string[]>([]);
+    fakeHttpResource.resolve(['b']);
+
+    fakeHttpResource.update((lista) => ['a', ...lista]);
+
+    expect(fakeHttpResource.status()).toBe('local');
+    expect(fakeHttpResource.value()).toEqual(['a', 'b']);
+
+    fakeHttpResource.set([]);
+    expect(fakeHttpResource.value()).toEqual([]);
+  });
 });

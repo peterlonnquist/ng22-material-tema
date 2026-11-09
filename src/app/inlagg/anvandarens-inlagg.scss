@@ -2,6 +2,19 @@
   display: block;
 }
 
+.nytt {
+  margin-bottom: 24px;
+
+  h2 {
+    font: var(--mat-sys-title-large);
+    margin: 0 0 16px;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
 mat-progress-bar {
   margin-bottom: 16px;
 }
