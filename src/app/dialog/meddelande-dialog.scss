@@ -1,0 +1,26 @@
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+// M3 har ingen egen färg för varning och lyckat, så tertiary och primary används
+.info {
+  color: var(--mat-sys-on-surface-variant);
+}
+.lyckat {
+  color: var(--mat-sys-primary);
+}
+.varning {
+  color: var(--mat-sys-tertiary);
+}
+.fel {
+  color: var(--mat-sys-error);
+}
+p {
+  margin: 0;
+}
+.detaljer {
+  margin-top: 12px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}

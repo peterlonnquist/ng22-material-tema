@@ -20,21 +20,7 @@ export interface BekraftaDialogData {
 @Component({
   selector: 'app-bekrafta-dialog',
   imports: [MatButton, MatDialogActions, MatDialogContent, MatDialogTitle],
-  template: `
-    <h2 mat-dialog-title>{{ data.rubrik }}</h2>
-    <mat-dialog-content>
-      <p>{{ data.fraga }}</p>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <!-- Avbryt får fokus: Enter ska inte av misstag göra något som inte går att ångra -->
-      <button matButton (click)="close(false)" cdkFocusInitial>{{ data.nej ?? 'Avbryt' }}</button>
-      <button matButton="filled" (click)="close(true)">{{ data.ja ?? 'OK' }}</button>
-    </mat-dialog-actions>
-  `,
-  styles: `
-    p {
-      margin: 0;
-    }
-  `,
+  templateUrl: './bekrafta-dialog.html',
+  styleUrl: './bekrafta-dialog.scss',
 })
 export class BekraftaDialog extends AppDialog<BekraftaDialogData, boolean> {}

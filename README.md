@@ -9,6 +9,7 @@ Skapad med vanliga Angular CLI (inte Nx): standalone-komponenter, zoneless, sign
 npm install
 npm start          # http://localhost:4200
 npm test           # Vitest + ng-mocks
+npm run test:coverage  # samma, med täckning: terminalen och coverage/ng22-material-tema/ (lcov.info, lcov-report/index.html)
 npm run build
 ```
 

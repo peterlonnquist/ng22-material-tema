@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>
+  <mat-icon aria-hidden="true" [class]="data.typ">{{ ikon() }}</mat-icon>
+  {{ data.rubrik }}
+</h2>
+<mat-dialog-content>
+  <p>{{ data.meddelande }}</p>
+  @if (data.detaljer) {
+    <p class="detaljer">{{ data.detaljer }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button matButton="filled" mat-dialog-close cdkFocusInitial>
+    {{ data.knapp ?? 'Stäng' }}
+  </button>
+</mat-dialog-actions>
