@@ -3,14 +3,15 @@
   <p>Hämtas med httpResource från JSONPlaceholder, ett gratis test-API med lorem ipsum-text.</p>
 </section>
 
-<nav class="anvandare" aria-label="Användare">
-  @for (a of anvandare.value(); track a.id) {
-    <a matButton="outlined" [routerLink]="[a.id]" routerLinkActive="aktiv">{{ a.name }}</a>
-  }
-</nav>
-
+<!-- Läs value() bara när det inte är fel: i felläge kastar en resurs från value() -->
 @if (anvandare.error()) {
   <p class="fel" role="alert">Kunde inte hämta användarna.</p>
+} @else {
+  <nav class="anvandare" aria-label="Användare">
+    @for (a of anvandare.value(); track a.id) {
+      <a matButton="outlined" [routerLink]="[a.id]" routerLinkActive="aktiv">{{ a.name }}</a>
+    }
+  </nav>
 }
 
 <router-outlet #utlopp="outlet" />

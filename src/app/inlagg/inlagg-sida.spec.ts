@@ -1,34 +1,33 @@
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
 import { provideRouter, RouterLink, RouterOutlet } from '@angular/router';
 import { MockBuilder, MockRender, NG_MOCKS_ROOT_PROVIDERS, ngMocks } from 'ng-mocks';
+import { fakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
 import { InlaggSida } from './inlagg-sida';
-import { InlaggService, JSONPLACEHOLDER_URL } from './inlagg.service';
+import { Anvandare } from './inlagg.model';
+import { InlaggService } from './inlagg.service';
 
 describe('InlaggSida', () => {
-  // Riktig router och HTTP mot en falsk backend. Material mockas.
-  beforeEach(() =>
-    MockBuilder(InlaggSida)
-      .keep(InlaggService)
+  // InlaggService mockas: anvandare() ger en fejkad resurs som testet styr.
+  // Routern är riktig för att kunna kontrollera länkarna.
+  let anvandare: FakeHttpResource<Anvandare[]>;
+
+  beforeEach(() => {
+    anvandare = fakeHttpResource<Anvandare[]>([]);
+    return MockBuilder(InlaggSida)
       .keep(RouterLink)
       .keep(RouterOutlet)
       .keep(NG_MOCKS_ROOT_PROVIDERS)
-      .provide(provideRouter([{ path: 'inlagg', component: InlaggSida }]))
-      .provide(provideHttpClient())
-      .provide(provideHttpClientTesting()),
-  );
+      .provide(provideRouter([]))
+      .mock(InlaggService, { anvandare: () => anvandare });
+  });
 
-  it('visar användarna som länkar till /inlagg/:id och ett tips innan någon är vald', async () => {
+  it('visar användarna som länkar och ett tips innan någon är vald', () => {
     const fixture = MockRender(InlaggSida);
-    TestBed.tick();
-    TestBed.inject(HttpTestingController)
-      .expectOne(`${JSONPLACEHOLDER_URL}/users`)
-      .flush([
-        { id: 1, name: 'Leanne Graham', email: 'a@example.com' },
-        { id: 2, name: 'Ervin Howell', email: 'b@example.com' },
-      ]);
-    await fixture.whenStable();
+
+    anvandare.resolve([
+      { id: 1, name: 'Leanne Graham', email: 'a@example.com' },
+      { id: 2, name: 'Ervin Howell', email: 'b@example.com' },
+    ]);
+    fixture.detectChanges();
 
     const lankar = ngMocks.findAll('nav a');
     expect(lankar.map((a) => ngMocks.formatText(a))).toEqual(['Leanne Graham', 'Ervin Howell']);
@@ -38,5 +37,14 @@ describe('InlaggSida', () => {
     expect(ngMocks.formatText(ngMocks.find('.tips'))).toBe(
       'Välj en användare för att se användarens inlägg.',
     );
+  });
+
+  it('visar ett fel om användarna inte gick att hämta', () => {
+    const fixture = MockRender(InlaggSida);
+
+    anvandare.fail();
+    fixture.detectChanges();
+
+    expect(ngMocks.formatText(ngMocks.find('.fel'))).toBe('Kunde inte hämta användarna.');
   });
 });

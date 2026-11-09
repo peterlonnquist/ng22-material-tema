@@ -1,84 +1,90 @@
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { Signal } from '@angular/core';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
+import { fakeHttpResource, FakeHttpResource } from '../../testing/fake-http-resource';
 import { AnvandarensInlagg } from './anvandarens-inlagg';
-import { InlaggService, JSONPLACEHOLDER_URL } from './inlagg.service';
+import { InlaggVy } from './inlagg.model';
+import { InlaggService } from './inlagg.service';
 
 describe('AnvandarensInlagg', () => {
-  // InlaggService och httpResource körs på riktigt mot en falsk backend
-  // (HttpTestingController). Material-komponenterna mockas.
-  beforeEach(() =>
-    MockBuilder(AnvandarensInlagg)
-      .keep(InlaggService)
-      .provide(provideHttpClient())
-      .provide(provideHttpClientTesting()),
-  );
+  // InlaggService mockas: inlagg() ger en fejkad resurs som testet styr.
+  // Hämtning, avbrytning och parse testas i inlagg.service.spec.ts.
+  let inlagg: FakeHttpResource<InlaggVy[]>;
+  let skickatId: Signal<string>;
 
-  /** Renderar med anvandarId som input, som routern gör från URL:en. */
-  async function visa(anvandarId: string) {
-    const fixture = MockRender(AnvandarensInlagg, { anvandarId });
-    const http = TestBed.inject(HttpTestingController);
-    // Ändringsdetektering och resurser, utan att vänta på obesvarade anrop
-    const uppdatera = async () => {
-      TestBed.tick();
-      await Promise.resolve();
-      fixture.detectChanges();
-    };
-    await uppdatera();
-    const text = (sel: string) => ngMocks.findAll(sel).map((el) => ngMocks.formatText(el));
-    return { fixture, http, text, uppdatera };
-  }
-
-  it('hämtar och visar inläggen för användaren i URL:en, med antal ord', async () => {
-    const { fixture, http, text } = await visa('2');
-
-    expect(ngMocks.find('mat-progress-bar', null)).not.toBeNull();
-    http.expectOne(`${JSONPLACEHOLDER_URL}/posts?userId=2`).flush([
-      { id: 11, userId: 2, title: 'et ea vero quia', body: 'delectus reiciendis' },
-      { id: 12, userId: 2, title: 'in quibusdam', body: 'itaque id aut' },
-    ]);
-    await fixture.whenStable();
-
-    expect(text('mat-card-title')).toEqual(['et ea vero quia', 'in quibusdam']);
-    expect(text('mat-card-subtitle')).toEqual(['2 ord', '3 ord']);
-    expect(ngMocks.find('mat-progress-bar', null)).toBeNull();
+  beforeEach(() => {
+    inlagg = fakeHttpResource<InlaggVy[]>([]);
+    return MockBuilder(AnvandarensInlagg).mock(InlaggService, {
+      inlagg: (id: Signal<string>) => {
+        skickatId = id;
+        return inlagg;
+      },
+    });
   });
 
-  it('hämtar på nytt när id i URL:en ändras', async () => {
-    const { fixture, http, text, uppdatera } = await visa('1');
-    const forsta = http.expectOne(`${JSONPLACEHOLDER_URL}/posts?userId=1`);
+  /** Renderar med anvandarId som input, som routern gör från URL:en. */
+  function visa(anvandarId = '1') {
+    const fixture = MockRender(AnvandarensInlagg, { anvandarId });
+    /** Uppdaterar vyn efter att testet ändrat resursens läge. */
+    const uppdatera = () => fixture.detectChanges();
+    const text = (sel: string) => ngMocks.findAll(sel).map((el) => ngMocks.formatText(el));
+    return { fixture, uppdatera, text };
+  }
+
+  it('skickar id från URL:en till tjänsten som signal, så att ändringar följer med', () => {
+    const { fixture, uppdatera } = visa('2');
+    expect(skickatId()).toBe('2');
 
     // Som när routern återanvänder komponenten för /inlagg/5
     fixture.componentInstance.anvandarId = '5';
-    await uppdatera();
+    uppdatera();
 
-    expect(forsta.cancelled).toBe(true);
-    http
-      .expectOne(`${JSONPLACEHOLDER_URL}/posts?userId=5`)
-      .flush([{ id: 41, userId: 5, title: 'non est facere', body: 'molestias id nostrum' }]);
-    await fixture.whenStable();
-
-    expect(text('mat-card-title')).toEqual(['non est facere']);
+    expect(skickatId()).toBe('5'); // samma signal, inte ett kopierat värde
   });
 
-  it('visar ett fel och hämtar igen med "Försök igen"', async () => {
-    const { fixture, http, text, uppdatera } = await visa('1');
-    http
-      .expectOne(`${JSONPLACEHOLDER_URL}/posts?userId=1`)
-      .flush(null, { status: 500, statusText: 'Internal Server Error' });
-    await fixture.whenStable();
+  it('visar en förloppsindikator medan inläggen hämtas', () => {
+    const { uppdatera, text } = visa();
+
+    inlagg.loading();
+    uppdatera();
+
+    expect(ngMocks.find('mat-progress-bar', null)).not.toBeNull();
+    expect(text('.tips')).toEqual([]); // inte "inga inlägg" medan det laddar
+  });
+
+  it('visar inläggen med antal ord', () => {
+    const { uppdatera, text } = visa();
+
+    inlagg.resolve([
+      { id: 11, userId: 2, title: 'et ea vero quia', body: '…', antalOrd: 24 },
+      { id: 12, userId: 2, title: 'in quibusdam', body: '…', antalOrd: 1 },
+    ]);
+    uppdatera();
+
+    expect(text('mat-card-title')).toEqual(['et ea vero quia', 'in quibusdam']);
+    expect(text('mat-card-subtitle')).toEqual(['24 ord', '1 ord']);
+    expect(ngMocks.find('mat-progress-bar', null)).toBeNull();
+  });
+
+  it('visar ett meddelande när användaren saknar inlägg', () => {
+    const { uppdatera, text } = visa();
+
+    inlagg.resolve([]);
+    uppdatera();
+
+    expect(text('.tips')).toEqual(['Användaren har inga inlägg.']);
+  });
+
+  it('visar ett fel och laddar om med "Försök igen"', () => {
+    const { uppdatera, text } = visa();
+
+    inlagg.fail();
+    uppdatera();
 
     expect(text('.fel p')).toEqual(['Kunde inte hämta inläggen.']);
+    expect(text('mat-card-title')).toEqual([]);
 
     ngMocks.click(ngMocks.find('.fel button'));
-    await uppdatera();
-    http
-      .expectOne(`${JSONPLACEHOLDER_URL}/posts?userId=1`)
-      .flush([{ id: 1, userId: 1, title: 'sunt aut facere', body: 'quia et suscipit' }]);
-    await fixture.whenStable();
 
-    expect(text('.fel p')).toEqual([]);
-    expect(text('mat-card-title')).toEqual(['sunt aut facere']);
+    expect(inlagg.reload).toHaveBeenCalledTimes(1);
   });
 });
