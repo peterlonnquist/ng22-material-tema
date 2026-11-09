@@ -1,0 +1,19 @@
+<section class="rubrik">
+  <h1>Inlägg</h1>
+  <p>Hämtas med httpResource från JSONPlaceholder, ett gratis test-API med lorem ipsum-text.</p>
+</section>
+
+<nav class="anvandare" aria-label="Användare">
+  @for (a of anvandare.value(); track a.id) {
+    <a matButton="outlined" [routerLink]="[a.id]" routerLinkActive="aktiv">{{ a.name }}</a>
+  }
+</nav>
+
+@if (anvandare.error()) {
+  <p class="fel" role="alert">Kunde inte hämta användarna.</p>
+}
+
+<router-outlet #utlopp="outlet" />
+@if (!utlopp.isActivated) {
+  <p class="tips">Välj en användare för att se användarens inlägg.</p>
+}

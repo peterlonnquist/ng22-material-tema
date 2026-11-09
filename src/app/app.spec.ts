@@ -16,11 +16,15 @@ describe('App', () => {
     expect(fixture.point.componentInstance).toBeInstanceOf(App);
   });
 
-  it('visar menylänkar till Start och Skapa', () => {
+  it('visar menylänkar till Start, Skapa och Inlägg', () => {
     MockRender(App);
     const lankar = ngMocks.findAll('nav.meny a');
-    expect(lankar.map((a) => ngMocks.formatText(a))).toEqual(['Start', 'Skapa']);
-    expect(lankar.map((a) => a.nativeElement.getAttribute('href'))).toEqual(['/', '/skapa']);
+    expect(lankar.map((a) => ngMocks.formatText(a))).toEqual(['Start', 'Skapa', 'Inlägg']);
+    expect(lankar.map((a) => a.nativeElement.getAttribute('href'))).toEqual([
+      '/',
+      '/skapa',
+      '/inlagg',
+    ]);
   });
 
   it('sätter mörkt-tema-klassen på <html> när man väljer mörkt läge', async () => {

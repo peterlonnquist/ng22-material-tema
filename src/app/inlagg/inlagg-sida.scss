@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.rubrik {
+  margin-bottom: 24px;
+
+  h1 {
+    font: var(--mat-sys-headline-medium);
+    margin: 0 0 4px;
+  }
+  p {
+    font: var(--mat-sys-body-large);
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+  }
+}
+
+.anvandare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+
+  .aktiv {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+}
+
+.tips {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fel {
+  color: var(--mat-sys-error);
+}

@@ -1,0 +1,29 @@
+@if (inlagg.isLoading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Hämtar inlägg" />
+}
+
+@if (inlagg.error()) {
+  <div class="fel" role="alert">
+    <p>Kunde inte hämta inläggen.</p>
+    <!-- reload() gör samma anrop igen, med samma parameter -->
+    <button matButton="outlined" (click)="inlagg.reload()">Försök igen</button>
+  </div>
+} @else {
+  <div class="lista">
+    @for (i of inlagg.value(); track i.id) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>{{ i.title }}</mat-card-title>
+          <mat-card-subtitle>{{ i.antalOrd }} ord</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ i.body }}</p>
+        </mat-card-content>
+      </mat-card>
+    } @empty {
+      @if (!inlagg.isLoading()) {
+        <p class="tips">Användaren har inga inlägg.</p>
+      }
+    }
+  </div>
+}

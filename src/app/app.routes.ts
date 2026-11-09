@@ -12,6 +12,18 @@ export const routes: Routes = [
     loadComponent: () => import('./skapa/skapa').then((m) => m.Skapa),
   },
   {
+    path: 'inlagg',
+    title: 'Inlägg – Material tema-demo',
+    loadComponent: () => import('./inlagg/inlagg-sida').then((m) => m.InlaggSida),
+    children: [
+      {
+        // :anvandarId blir input på AnvandarensInlagg (withComponentInputBinding)
+        path: ':anvandarId',
+        loadComponent: () => import('./inlagg/anvandarens-inlagg').then((m) => m.AnvandarensInlagg),
+      },
+    ],
+  },
+  {
     path: 'arenden/:id',
     title: 'Ärende – Material tema-demo',
     loadComponent: () => import('./arende/arende-detalj').then((m) => m.ArendeDetalj),

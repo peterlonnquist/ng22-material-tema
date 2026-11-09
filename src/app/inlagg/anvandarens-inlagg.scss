@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+mat-progress-bar {
+  margin-bottom: 16px;
+}
+
+.lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+// Lorem ipsum-titlarna är skrivna med gemener
+mat-card-title::first-letter {
+  text-transform: uppercase;
+}
+
+mat-card-content p {
+  white-space: pre-line; // texterna innehåller radbrytningar
+  margin: 8px 0 0;
+}
+
+.tips {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fel {
+  color: var(--mat-sys-error);
+
+  p {
+    margin: 0 0 8px;
+  }
+}
